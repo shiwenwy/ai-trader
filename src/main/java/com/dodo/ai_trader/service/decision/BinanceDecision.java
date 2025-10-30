@@ -23,7 +23,7 @@ public class BinanceDecision {
 
     private static String jsonFormat = "{\n" +
             "  \"signal\": \"buy_to_enter\" | \"sell_to_enter\" | \"hold\" | \"close\",\n" +
-            "  \"coin\": \"BTC\" | \"ETH\" | \"SOL\" | \"BNB\" | \"DOGE\" | \"XRP\",\n" +
+            "  \"coin\": \"BTC\" | \"ETH\" | \"SOL\" | \"BNB\",\n" +
             "  \"quantity\": <float>,\n" +
             "  \"leverage\": <integer 1-20>,\n" +
             "  \"profit_target\": <float>,\n" +
