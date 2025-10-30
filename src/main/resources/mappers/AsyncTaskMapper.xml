@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dodo.ai_trader.service.mapper.AsyncTaskMapper">
+    <resultMap id="BaseResultMap" type="com.dodo.ai_trader.service.mapper.entity.AsyncTaskEntity">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="user_id" property="userId" jdbcType="VARCHAR"/>
+        <result column="biz_id" property="bizId" jdbcType="VARCHAR"/>
+        <result column="task_type" property="taskType" jdbcType="VARCHAR"/>
+        <result column="task_status" property="taskStatus" jdbcType="VARCHAR"/>
+        <result column="shard_id" property="shardId" jdbcType="VARCHAR"/>
+        <result column="ext_info" property="extInfo" jdbcType="VARCHAR"/>
+        <result column="next_execute_time" property="nextExecuteTime" jdbcType="TIMESTAMP"/>
+        <result column="execute_count" property="executeCount" jdbcType="INTEGER"/>
+        <result column="version" property="version" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, create_time, update_time, user_id, biz_id, task_type, task_status, shard_id, next_execute_time,
+        execute_count, version, ext_info
+    </sql>
+
+    <insert id="saveAsyncTask" parameterType="com.dodo.ai_trader.service.mapper.entity.AsyncTaskEntity">
+        INSERT INTO async_task (create_time, update_time, user_id, biz_id, task_type, task_status,
+        shard_id, next_execute_time, execute_count, version, ext_info)
+        VALUES (now(), now(), #{userId,jdbcType=VARCHAR}, #{bizId,jdbcType=VARCHAR}, #{taskType,jdbcType=VARCHAR},
+        #{taskStatus,jdbcType=VARCHAR}, #{shardId,jdbcType=VARCHAR}, #{nextExecuteTime,jdbcType=TIMESTAMP},
+        #{executeCount,jdbcType=INTEGER}, #{version,jdbcType=INTEGER}, #{extInfo,jdbcType=VARCHAR})
+    </insert>
+
+    <select id="queryAsyncTask" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM async_task
+        WHERE biz_id = #{bizId,jdbcType=VARCHAR}
+        AND task_type = #{taskType,jdbcType=VARCHAR}
+        AND shard_id = #{shardId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="queryExecuteTaskList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM async_task
+        WHERE task_type IN
+        <foreach collection="taskTypeList" item="taskType" open="(" separator="," close=")">
+            #{taskType,jdbcType=VARCHAR}
+        </foreach>
+        AND shard_id = #{shardId,jdbcType=VARCHAR}
+        AND task_status IN ('INIT','ERROR')
+        AND <![CDATA[next_execute_time <= now()]]>
+        order by id asc
+        limit #{pageSize,jdbcType=INTEGER}
+    </select>
+
+    <select id="queryAllShardExecuteTaskList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM async_task
+        WHERE task_type IN
+        <foreach collection="taskTypeList" item="taskType" open="(" separator="," close=")">
+            #{taskType,jdbcType=VARCHAR}
+        </foreach>
+        AND task_status IN ('INIT','ERROR')
+        AND <![CDATA[next_execute_time <= now()]]>
+        order by id asc
+        limit #{pageSize,jdbcType=INTEGER}
+    </select>
+
+    <update id="updateAsyncTaskStatus" >
+        UPDATE async_task
+        SET task_status = #{afterStatus,jdbcType=VARCHAR},
+        version = version + 1
+        WHERE biz_id = #{bizId,jdbcType=VARCHAR}
+        AND task_type = #{taskType,jdbcType=VARCHAR}
+        AND shard_id = #{shardId,jdbcType=VARCHAR}
+        AND task_status = #{beforeStatus,jdbcType=VARCHAR}
+        AND version = #{version,jdbcType=INTEGER}
+    </update>
+
+    <update id="updateExecuteCountAndNextExecuteTime" >
+        UPDATE async_task
+        SET execute_count = #{executeCount,jdbcType=INTEGER},
+        next_execute_time = #{nextExecuteTime,jdbcType=TIMESTAMP},
+        version = version + 1
+        WHERE biz_id = #{bizId,jdbcType=VARCHAR}
+        AND task_type = #{taskType,jdbcType=VARCHAR}
+        AND shard_id = #{shardId,jdbcType=VARCHAR}
+        AND version = #{version,jdbcType=INTEGER}
+    </update>
+
+    <select id="queryUserProcessingTask" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM async_task
+        WHERE user_id = #{userId,jdbcType=VARCHAR}
+        AND task_type =#{taskType,jdbcType=VARCHAR}
+        AND shard_id = #{shardId,jdbcType=VARCHAR}
+        AND task_status IN ('INIT','PROCESSING', 'ERROR')
+    </select>
+</mapper>
