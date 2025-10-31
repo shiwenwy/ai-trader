@@ -13,55 +13,68 @@ public class CommonPosition implements Serializable {
 
     private static final long serialVersionUID = -4770193413944831966L;
     /**
-     * 标的代码
+     * 标的代码 (如 BTC, ETH 等)
      */
     private String symbol;
+
     /**
      * 持仓数量
      */
     private Double quantity;
+
     /**
      * 入场价格
      */
-    private Double entry_price;
+    private Double entryPrice;
+
     /**
      * 当前价格
      */
-    private Double current_price;
+    private Double currentPrice;
+
     /**
      * 强平价格
      */
-    private Double liquidation_price;
+    private Double liquidationPrice;
+
     /**
      * 未实现盈亏
      */
-    private Double unrealized_pnl;
+    private Double unrealizedPnl;
+
     /**
      * 杠杆倍数
      */
     private Integer leverage;
+
     /**
      * 止盈目标
      */
-    private Double profit_target;
+    private Double profitTarget;
+
     /**
      * 止损位
      */
-    private Double stop_loss;
+    private Double stopLoss;
+
     /**
      * 策略失效条件
      */
-    private String invalidation_condition;
+    private String invalidationCondition;
+
     /**
-     * 信心指数
+     * 信心指数 (0-1)
      */
     private Double confidence;
+
     /**
      * 风险金额（USD）
      */
-    private Double risk_usd;
+    private Double riskUsd;
+
     /**
      * 名义价值（USD）
      */
-    private Double notional_usd;
+    private Double notionalUsd;
+
 }

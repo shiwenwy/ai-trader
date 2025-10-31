@@ -59,9 +59,42 @@ public class BinanceDecision {
     }
 
 
-    private Prompt buildUserPrompt(List<CommonPosition> currPositions) {
+    public Prompt buildUserPrompt(long minutesElapsed, Map<String, Object> btcData,
+                                  Map<String, Object> ethData, Map<String, Object> solData,
+                                  Map<String, Object> bnbData, double returnPct,
+                                  double sharpeRatio, double cashAvailable, double accountValue,
+                                  List<CommonPosition> currPositions) {
         Map<String, Object> variables = new HashMap<>();
+        // 填充时间信息
+        variables.put("minutes_elapsed", minutesElapsed);
+
+        // 填充账户信息
+        variables.put("return_pct", returnPct);
+        variables.put("sharpe_ratio", sharpeRatio);
+        variables.put("cash_available", cashAvailable);
+        variables.put("account_value", accountValue);
         variables.put("current_positions", currPositions == null || currPositions.isEmpty() ? "" : JSONUtil.toJsonStr(currPositions));
+
+        // 填充BTC数据
+        if (btcData != null) {
+            variables.putAll(btcData);
+        }
+
+        // 填充ETH数据
+        if (ethData != null) {
+            variables.putAll(ethData);
+        }
+
+        // 填充SOL数据
+        if (solData != null) {
+            variables.putAll(solData);
+        }
+
+        // 填充BNB数据
+        if (bnbData != null) {
+            variables.putAll(bnbData);
+        }
+
         PromptTemplate template = new PromptTemplate(userResource);
 
         return template.create(variables);
