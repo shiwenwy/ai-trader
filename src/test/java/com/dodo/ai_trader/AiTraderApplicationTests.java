@@ -1,17 +1,24 @@
 package com.dodo.ai_trader;
 
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson2.JSON;
 import com.dodo.ai_trader.service.decision.BinanceDecision;
 import com.dodo.ai_trader.service.model.CommonPosition;
+import com.dodo.ai_trader.service.utils.AiResParseUtil;
+import com.dodo.ai_trader.service.utils.LogUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 class AiTraderApplicationTests {
@@ -39,18 +46,18 @@ class AiTraderApplicationTests {
 		btc.setConfidence(0.8);
 		btc.setRiskUsd(5000.0);
 		positions.add(btc);
-		CommonPosition eth = new CommonPosition();
-		eth.setSymbol("ETH");
-		eth.setSide("SHORT");
-		eth.setQuantity(0.5);
-		eth.setEntryPrice(2000.0);
-		eth.setCurrentPrice(2050.0);
-		eth.setLeverage(20);
-		eth.setProfitTarget(0.05);
-		eth.setStopLoss(0.02);
-		eth.setInvalidationCondition("eth_price > 2100");
-		eth.setConfidence(0.8);
-		positions.add(eth);
+//		CommonPosition eth = new CommonPosition();
+//		eth.setSymbol("ETH");
+//		eth.setSide("SHORT");
+//		eth.setQuantity(0.5);
+//		eth.setEntryPrice(2000.0);
+//		eth.setCurrentPrice(2050.0);
+//		eth.setLeverage(20);
+//		eth.setProfitTarget(0.05);
+//		eth.setStopLoss(0.02);
+//		eth.setInvalidationCondition("eth_price > 2100");
+//		eth.setConfidence(0.8);
+//		positions.add(eth);
 
 		// 准备BTC数据
 		Map<String, Object> btcData = new HashMap<>();
@@ -142,16 +149,72 @@ class AiTraderApplicationTests {
 		bnbData.put("bnb_macd_4h", "5,7,9,11,13,14,15,16");
 		bnbData.put("bnb_rsi14_4h", "40,42,44,46,48,50,52,54");
 
-		Message systemPrompt = binanceDecision.buildSystemMessage(10000);
-
-		Message userPrompt = binanceDecision.buildUserMessage(100, btcData, ethData, solData, bnbData, 0.0, 0.0, 1000000.0, 1000000.0, positions);
-
-		Prompt prompt = new Prompt(systemPrompt, userPrompt);
-		System.out.println(prompt.getContents());
+//		Message systemPrompt = binanceDecision.buildSystemMessage(10000);
+//
+//		Message userPrompt = binanceDecision.buildUserMessage(100, btcData, ethData, solData, bnbData, 0.0, 0.0, 1000000.0, 1000000.0, positions);
+//
+//		Prompt prompt = new Prompt(systemPrompt, userPrompt);
+//		System.out.println(prompt.getContents());
 //		System.out.println(systemPrompt.getText());
 //		System.out.println(userPrompt.getText());
 
-//		String decision = binanceDecision.getDecision(100, btcData, ethData, solData, bnbData, 0.0, 0.0, 1000000.0, 1000000.0, positions, 10000);
-//		System.out.println(decision);
+		Flux<String> decision = binanceDecision.getDecision(100, btcData, ethData, solData, bnbData, 0.0, 0.0, 1000000.0, 1000000.0, positions, 10000);
+
+//		String result = decision.collect(StringBuilder::new, (sb, s) -> sb.append(s)).block().toString();
+		String result = decision.collectList().block().stream().collect(Collectors.joining());
+
+
+		System.out.println();
+		LogUtil.serviceLog("返回成功");
+		System.out.println("--------------------");
+		System.out.println(result);
+		System.out.println("--------------------");
+		String res = AiResParseUtil.parseAiRes(result).trim();
+		System.out.println(res);
+		System.out.println("--------------------");
+		JSONObject jsonObject = JSONUtil.parseObj(res);
+		System.out.println(jsonObject.getStr("coin"));
+		System.out.println(jsonObject.getStr("signal"));
+		System.out.println(jsonObject.getFloat("profit_target"));
+		System.out.println(jsonObject.getFloat("quantity"));
+	}
+
+	@Test
+	public void test1() {
+		String result = "**思维链分析：**\n" +
+				"\n" +
+				"当前持仓分析：BTC多头仓位表现良好，当前浮盈2.5%（30500 vs 30000入场），但尚未达到5%的盈利目标。趋势依然向上，EMA20持续支撑，MACD和RSI均显示健康上涨动量。\n" +
+				"\n" +
+				"新机会评估：\n" +
+				"- BTC：强势上涨趋势，价格>EMA20，MACD持续上升，RSI 65.5未超买，资金费率微正，未平仓合约增加支撑趋势。但已持有仓位，不宜重复开仓。\n" +
+				"- ETH：温和上涨，RSI 58.2中性偏强，但信号强度不如BTC明显。\n" +
+				"- SOL/BNB：横盘震荡，无明显趋势信号，RSI中性，缺乏明确方向。\n" +
+				"\n" +
+				"风险考虑：当前夏普比率为0，需要谨慎开仓。BTC持仓已占用部分资金，且杠杆较高(20x)，应优先管理现有仓位而非开新仓。\n" +
+				"\n" +
+				"决策：维持BTC多头持仓，让利润继续奔跑。其他币种信号不足，观望为主。\n" +
+				"\n" +
+				"```json\n" +
+				"{\n" +
+				"  \"signal\": \"hold\",\n" +
+				"  \"coin\": \"BTC\",\n" +
+				"  \"quantity\": 0,\n" +
+				"  \"leverage\": 1,\n" +
+				"  \"profit_target\": 31500,\n" +
+				"  \"stop_loss\": 29100,\n" +
+				"  \"invalidation_condition\": \"BTC价格跌破29100或RSI7跌破50\",\n" +
+				"  \"confidence\": 0.75,\n" +
+				"  \"risk_usd\": 4500,\n" +
+				"  \"justification\": \"BTC多头持仓表现良好，趋势持续向上。EMA20支撑有效，MACD和RSI显示健康上涨动量。未平仓合约增加支撑趋势。让利润奔跑至31500目标，同时设置29100止损保护收益。其他币种信号强度不足，优先管理现有高质量仓位。\"\n" +
+				"}\n" +
+				"```";
+		String res = AiResParseUtil.parseAiRes(result).trim();
+		System.out.println(res);
+
+		JSONObject jsonObject = JSONUtil.parseObj(res);
+		System.out.println(jsonObject.getStr("coin"));
+		System.out.println(jsonObject.getStr("signal"));
+		System.out.println(jsonObject.getFloat("profit_target"));
+		System.out.println(jsonObject.getFloat("quantity"));
 	}
 }

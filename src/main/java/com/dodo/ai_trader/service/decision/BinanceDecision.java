@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +60,6 @@ public class BinanceDecision {
         return template.createMessage(variables);
     }
 
-
     public Message buildUserMessage(long minutesElapsed, Map<String, Object> btcData,
                                   Map<String, Object> ethData, Map<String, Object> solData,
                                   Map<String, Object> bnbData, double returnPct,
@@ -101,16 +101,16 @@ public class BinanceDecision {
     }
 
 
-    public String getDecision(long minutesElapsed, Map<String, Object> btcData,
-                              Map<String, Object> ethData, Map<String, Object> solData,
-                              Map<String, Object> bnbData, double returnPct,
-                              double sharpeRatio, double cashAvailable, double accountValue,
-                              List<CommonPosition> currPositions, Integer initialFunding) {
+    public Flux<String> getDecision(long minutesElapsed, Map<String, Object> btcData,
+                                    Map<String, Object> ethData, Map<String, Object> solData,
+                                    Map<String, Object> bnbData, double returnPct,
+                                    double sharpeRatio, double cashAvailable, double accountValue,
+                                    List<CommonPosition> currPositions, Integer initialFunding) {
         Message systemMessage = buildSystemMessage(initialFunding);
         Message userMessaget = buildUserMessage(minutesElapsed, btcData, ethData, solData, bnbData,
                 returnPct, sharpeRatio, cashAvailable, accountValue, currPositions);
 
-        return chatClient.prompt(new Prompt(systemMessage, userMessaget)).call().content();
+        return chatClient.prompt(new Prompt(systemMessage, userMessaget)).stream().content();
     }
 
 }
