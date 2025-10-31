@@ -1,8 +1,11 @@
 package com.dodo.ai_trader.service.decision;
 
+import cn.hutool.json.JSONUtil;
 import com.dodo.ai_trader.service.config.BizConfig;
+import com.dodo.ai_trader.service.model.CommonPosition;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +13,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -20,10 +24,11 @@ public class BinanceDecision {
     @Autowired
     private BizConfig bizConfig;
 
-    @Value("classpath:/prompts/system-message.mustache")
+    @Value("classpath:/prompts/binance-system-message.mustache")
     private Resource systemResource;
 
-    
+    @Value("classpath:/prompts/binance-user-message.mustache")
+    private Resource userResource;
 
     private static String jsonFormat = "{\n" +
             "  \"signal\": \"buy_to_enter\" | \"sell_to_enter\" | \"hold\" | \"close\",\n" +
@@ -53,6 +58,15 @@ public class BinanceDecision {
         return template.create(variables);
     }
 
+
+    private Prompt buildUserPrompt(List<CommonPosition> currPositions) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("current_positions", currPositions == null || currPositions.isEmpty() ? "" : JSONUtil.toJsonStr(currPositions));
+        PromptTemplate template = new PromptTemplate(userResource);
+
+        return template.create(variables);
+    }
+
     public String test(){
 
         Prompt systemPrompt = buildSystemPrompt(10000);
@@ -60,7 +74,4 @@ public class BinanceDecision {
         return systemPrompt.getContents();
     }
 
-    public static void main(String[] args) {
-
-    }
 }
