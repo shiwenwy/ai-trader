@@ -4,6 +4,7 @@ import cn.hutool.json.JSONUtil;
 import com.dodo.ai_trader.service.config.BizConfig;
 import com.dodo.ai_trader.service.model.CommonPosition;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
@@ -43,7 +44,8 @@ public class BinanceDecision {
             "  \"justification\": \"<string>\"\n" +
             "}";
 
-    private Prompt buildSystemPrompt(Integer initialFunding) {
+    public Message buildSystemMessage(Integer initialFunding) {
+
         Map<String, Object> variables = new HashMap<>();
         variables.put("initialFunding", initialFunding);
         variables.put("altcoinMin", bizConfig.getAltcoinMin());
@@ -54,12 +56,11 @@ public class BinanceDecision {
         variables.put("btcLeverage", bizConfig.getBtcLeverage());
         variables.put("jsonFormat", jsonFormat);
         SystemPromptTemplate template = new SystemPromptTemplate(systemResource);
-
-        return template.create(variables);
+        return template.createMessage(variables);
     }
 
 
-    public Prompt buildUserPrompt(long minutesElapsed, Map<String, Object> btcData,
+    public Message buildUserMessage(long minutesElapsed, Map<String, Object> btcData,
                                   Map<String, Object> ethData, Map<String, Object> solData,
                                   Map<String, Object> bnbData, double returnPct,
                                   double sharpeRatio, double cashAvailable, double accountValue,
@@ -96,15 +97,20 @@ public class BinanceDecision {
         }
 
         PromptTemplate template = new PromptTemplate(userResource);
-
-        return template.create(variables);
+        return template.createMessage(variables);
     }
 
-    public String test(){
 
-        Prompt systemPrompt = buildSystemPrompt(10000);
+    public String getDecision(long minutesElapsed, Map<String, Object> btcData,
+                              Map<String, Object> ethData, Map<String, Object> solData,
+                              Map<String, Object> bnbData, double returnPct,
+                              double sharpeRatio, double cashAvailable, double accountValue,
+                              List<CommonPosition> currPositions, Integer initialFunding) {
+        Message systemMessage = buildSystemMessage(initialFunding);
+        Message userMessaget = buildUserMessage(minutesElapsed, btcData, ethData, solData, bnbData,
+                returnPct, sharpeRatio, cashAvailable, accountValue, currPositions);
 
-        return systemPrompt.getContents();
+        return chatClient.prompt(new Prompt(systemMessage, userMessaget)).call().content();
     }
 
 }

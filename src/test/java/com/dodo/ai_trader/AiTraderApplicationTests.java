@@ -3,6 +3,7 @@ package com.dodo.ai_trader;
 import com.dodo.ai_trader.service.decision.BinanceDecision;
 import com.dodo.ai_trader.service.model.CommonPosition;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,15 +25,10 @@ class AiTraderApplicationTests {
 
 	@Test
 	public void test() {
-		String test = binanceDecision.test();
-		System.out.println(test);
-	}
-
-	@Test
-	public void test2() {
 		List<CommonPosition> positions = new ArrayList<>();
 		CommonPosition btc = new CommonPosition();
 		btc.setSymbol("BTC");
+		btc.setSide("LONG");
 		btc.setQuantity(0.5);
 		btc.setEntryPrice(30000.0);
 		btc.setCurrentPrice(30500.0);
@@ -45,6 +41,7 @@ class AiTraderApplicationTests {
 		positions.add(btc);
 		CommonPosition eth = new CommonPosition();
 		eth.setSymbol("ETH");
+		eth.setSide("SHORT");
 		eth.setQuantity(0.5);
 		eth.setEntryPrice(2000.0);
 		eth.setCurrentPrice(2050.0);
@@ -145,7 +142,16 @@ class AiTraderApplicationTests {
 		bnbData.put("bnb_macd_4h", "5,7,9,11,13,14,15,16");
 		bnbData.put("bnb_rsi14_4h", "40,42,44,46,48,50,52,54");
 
-		Prompt userPrompt = binanceDecision.buildUserPrompt(100, btcData, ethData, solData, bnbData, 0.0, 0.0, 1000000.0, 1000000.0, positions);
-		System.out.println(userPrompt.getContents());
+		Message systemPrompt = binanceDecision.buildSystemMessage(10000);
+
+		Message userPrompt = binanceDecision.buildUserMessage(100, btcData, ethData, solData, bnbData, 0.0, 0.0, 1000000.0, 1000000.0, positions);
+
+		Prompt prompt = new Prompt(systemPrompt, userPrompt);
+		System.out.println(prompt.getContents());
+//		System.out.println(systemPrompt.getText());
+//		System.out.println(userPrompt.getText());
+
+//		String decision = binanceDecision.getDecision(100, btcData, ethData, solData, bnbData, 0.0, 0.0, 1000000.0, 1000000.0, positions, 10000);
+//		System.out.println(decision);
 	}
 }

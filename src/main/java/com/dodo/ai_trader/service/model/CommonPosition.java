@@ -18,6 +18,11 @@ public class CommonPosition implements Serializable {
     private String symbol;
 
     /**
+     * 仓位方向 (LONG, SHORT)
+     */
+    private String side;
+
+    /**
      * 持仓数量
      */
     private Double quantity;
