@@ -17,3 +17,13 @@ spring:
       pool-prepared-statements: true
       max-pool-prepared-statement-per-connection-size: 20
       connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+
+
+biz:
+  config:
+    altcoinMin: 100
+    altcoinMax: 1000
+    altcoinLeverage: 5
+    btcMin: 200
+    btcMax: 2000
+    btcLeverage: 10
