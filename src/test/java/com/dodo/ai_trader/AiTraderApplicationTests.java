@@ -5,10 +5,7 @@ import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson2.JSON;
 import com.binance.connector.client.common.ApiResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.DerivativesTradingUsdsFuturesRestApi;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.AccountInformationV2Response;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.AccountInformationV3Response;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.GetFundingRateHistoryResponse;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.PositionInformationV3Response;
+import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.*;
 import com.dodo.ai_trader.service.decision.BinanceDecision;
 import com.dodo.ai_trader.service.model.CommonPosition;
 import com.dodo.ai_trader.service.utils.AiResParseUtil;
@@ -243,6 +240,13 @@ class AiTraderApplicationTests {
 	@Test
 	public void test4() {
 		ApiResponse<PositionInformationV3Response> btcusdt = binanceFuturesRestApi.positionInformationV3("BTCUSDT", null);
+		System.out.println(btcusdt.getData().toJson());
+	}
+
+	@Test
+	public void test5() {
+
+		binanceFuturesRestApi.klineCandlestickData("BTCUSDT", Interval.INTERVAL_5m, null, null, 20L)
 		System.out.println(btcusdt.getData().toJson());
 	}
 
