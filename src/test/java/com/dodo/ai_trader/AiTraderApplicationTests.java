@@ -246,8 +246,10 @@ class AiTraderApplicationTests {
 	@Test
 	public void test5() {
 
-		binanceFuturesRestApi.klineCandlestickData("BTCUSDT", Interval.INTERVAL_5m, null, null, 20L)
+		ApiResponse<KlineCandlestickDataResponse> btcusdt = binanceFuturesRestApi.klineCandlestickData("BTCUSDT", Interval.INTERVAL_5m, null, null, 20L);
 		System.out.println(btcusdt.getData().toJson());
 	}
 
+	@Test
+	public void test6() { }
 }
