@@ -1,4 +1,4 @@
-package com.dodo.ai_trader.service.model;
+package com.dodo.ai_trader.service.model.market;
 
 import lombok.Data;
 import lombok.ToString;

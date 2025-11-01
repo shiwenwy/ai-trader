@@ -2,13 +2,17 @@ package com.dodo.ai_trader.service.client.impl;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.binance.connector.client.common.ApiResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.DerivativesTradingUsdsFuturesRestApi;
+import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.GetFundingRateHistoryResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.Interval;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.KlineCandlestickDataResponse;
+import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.OpenInterestResponse;
 import com.dodo.ai_trader.service.client.ExchangeClient;
 import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
-import com.dodo.ai_trader.service.model.KLine;
+import com.dodo.ai_trader.service.model.market.FundingRate;
+import com.dodo.ai_trader.service.model.market.KLine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,8 +28,8 @@ public class BinanceExchangeClient implements ExchangeClient {
 
     @Override
     public List<KLine> getFuturesKLine(String symbol, ExchangeIntervalEnum interval, Integer limit) {
-        ApiResponse<KlineCandlestickDataResponse> btcusdt = binanceFuturesRestApi.klineCandlestickData(symbol.toUpperCase() + "USDT", convertInterval(interval), null, null, limit.longValue());
-        JSONArray objects = JSON.parseArray(btcusdt.getData().toJson());
+        ApiResponse<KlineCandlestickDataResponse> klines = binanceFuturesRestApi.klineCandlestickData(convertCommonPair(symbol), convertInterval(interval), null, null, limit.longValue());
+        JSONArray objects = JSON.parseArray(klines.getData().toJson());
         if (objects == null || objects.isEmpty()) {
             return null;
         }
@@ -49,8 +53,45 @@ public class BinanceExchangeClient implements ExchangeClient {
         return list;
     }
 
+    @Override
+    public BigDecimal getOpenInterest(String symbol) {
+        ApiResponse<OpenInterestResponse> openInterest = binanceFuturesRestApi.openInterest(convertCommonPair(symbol));
+        if (openInterest != null && openInterest.getData() != null) {
+            return new BigDecimal(openInterest.getData().getOpenInterest());
+        }
+        return null;
+    }
+
+    @Override
+    public List<FundingRate> getLastFundingRate(String symbol) {
+        ApiResponse<GetFundingRateHistoryResponse> fundingRateHistory = binanceFuturesRestApi.getFundingRateHistory(convertCommonPair(symbol), null, null, 5L);
+
+        JSONArray objects = JSON.parseArray(fundingRateHistory.getData().toJson());
+        if (objects == null || objects.isEmpty()) {
+            return null;
+        }
+        List<FundingRate> list = new ArrayList<>();
+        for (int i = 0; i < objects.size(); i++) {
+            JSONObject jsonObject = objects.getJSONObject(i);
+            FundingRate fundingRate = new FundingRate();
+            fundingRate.setFundingRate(new BigDecimal(jsonObject.getString("fundingRate")));
+            fundingRate.setFundingTime(jsonObject.getLong("fundingTime"));
+            fundingRate.setMarkPrice(new BigDecimal(jsonObject.getString("markPrice")));
+            list.add(fundingRate);
+        }
+        return list;
+    }
+
 
     private Interval convertInterval(ExchangeIntervalEnum interval) {
         return Interval.fromValue(interval.getValue());
+    }
+
+    private String convertCommonPair(String symbol) {
+        String upperCase = symbol.toUpperCase();
+        if (upperCase.contains("USDT")) {
+            return upperCase;
+        }
+        return upperCase + "USDT";
     }
 }

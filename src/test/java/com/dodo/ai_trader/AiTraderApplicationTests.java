@@ -2,7 +2,6 @@ package com.dodo.ai_trader;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.alibaba.fastjson2.JSON;
 import com.binance.connector.client.common.ApiResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.DerivativesTradingUsdsFuturesRestApi;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.*;
@@ -10,13 +9,10 @@ import com.dodo.ai_trader.service.client.ExchangeClient;
 import com.dodo.ai_trader.service.decision.BinanceDecision;
 import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
 import com.dodo.ai_trader.service.model.CommonPosition;
-import com.dodo.ai_trader.service.model.KLine;
+import com.dodo.ai_trader.service.model.market.KLine;
 import com.dodo.ai_trader.service.utils.AiResParseUtil;
 import com.dodo.ai_trader.service.utils.LogUtil;
-import org.apache.logging.log4j.util.Base64Util;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Flux;
@@ -259,5 +255,15 @@ class AiTraderApplicationTests {
 	}
 
 	@Test
-	public void test6() { }
+	public void test6() {
+		ApiResponse<OpenInterestResponse> btcusdt = binanceFuturesRestApi.openInterest("BTCUSDT");
+		System.out.println(btcusdt.getData().toJson());
+		System.out.println(btcusdt.getData().getOpenInterest());
+	}
+
+	@Test
+	public void test7() {
+		ApiResponse<GetFundingRateHistoryResponse> btcusdt = binanceFuturesRestApi.getFundingRateHistory("BTCUSDT", null, null, 5L);
+		System.out.println(btcusdt.getData().toJson());
+	}
 }
