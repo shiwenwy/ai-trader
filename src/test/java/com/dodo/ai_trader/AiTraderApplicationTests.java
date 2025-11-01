@@ -6,8 +6,11 @@ import com.alibaba.fastjson2.JSON;
 import com.binance.connector.client.common.ApiResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.DerivativesTradingUsdsFuturesRestApi;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.*;
+import com.dodo.ai_trader.service.client.ExchangeClient;
 import com.dodo.ai_trader.service.decision.BinanceDecision;
+import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
 import com.dodo.ai_trader.service.model.CommonPosition;
+import com.dodo.ai_trader.service.model.KLine;
 import com.dodo.ai_trader.service.utils.AiResParseUtil;
 import com.dodo.ai_trader.service.utils.LogUtil;
 import org.apache.logging.log4j.util.Base64Util;
@@ -243,11 +246,16 @@ class AiTraderApplicationTests {
 		System.out.println(btcusdt.getData().toJson());
 	}
 
+	@Autowired
+	private Map<String, ExchangeClient> exchangeClientMap;
 	@Test
 	public void test5() {
 
 		ApiResponse<KlineCandlestickDataResponse> btcusdt = binanceFuturesRestApi.klineCandlestickData("BTCUSDT", Interval.INTERVAL_5m, null, null, 20L);
 		System.out.println(btcusdt.getData().toJson());
+		ExchangeClient binance = exchangeClientMap.get("binance");
+		List<KLine> kLines = binance.getFuturesKLine("BTC", ExchangeIntervalEnum.INTERVAL_5m, 20);
+		System.out.println(kLines);
 	}
 
 	@Test
