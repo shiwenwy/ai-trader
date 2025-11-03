@@ -8,7 +8,9 @@ import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.De
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.*;
 import com.dodo.ai_trader.service.client.ExchangeClient;
 import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
+import com.dodo.ai_trader.service.enums.SideEnum;
 import com.dodo.ai_trader.service.model.market.ExchangeBalance;
+import com.dodo.ai_trader.service.model.market.ExchangePosition;
 import com.dodo.ai_trader.service.model.market.FundingRate;
 import com.dodo.ai_trader.service.model.market.KLine;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +93,33 @@ public class BinanceExchangeClient implements ExchangeClient {
         return exchangeBalance;
     }
 
+    @Override
+    public List<ExchangePosition> getPosition(String symbol) {
+        ApiResponse<PositionInformationV2Response> positionInformationV2 = binanceFuturesRestApi.positionInformationV2(convertCommonPair(symbol), null);
+        JSONArray objects = JSON.parseArray(positionInformationV2.getData().toJson());
+        if (objects == null || objects.isEmpty()) {
+            return null;
+        }
+        List<ExchangePosition> list = new ArrayList<>();
+        for (int i = 0; i < objects.size(); i++) {
+            JSONObject jsonObject = objects.getJSONObject(i);
+            BigDecimal positionAmt = new BigDecimal(jsonObject.getString("positionAmt"));
+            if (positionAmt.compareTo(BigDecimal.ZERO) == 0) {
+                continue;
+            }
+            ExchangePosition exchangePosition = new ExchangePosition();
+            exchangePosition.setSymbol(jsonObject.getString("symbol"));
+            exchangePosition.setSide(positionAmt.compareTo(BigDecimal.ZERO) > 0 ? SideEnum.LONG : SideEnum.SHORT);
+            exchangePosition.setPositionAmt(positionAmt);
+            exchangePosition.setEntryPrice(new BigDecimal(jsonObject.getString("entryPrice")));
+            exchangePosition.setMarkPrice(new BigDecimal(jsonObject.getString("markPrice")));
+            exchangePosition.setUnRealizedProfit(new BigDecimal(jsonObject.getString("unRealizedProfit")));
+            exchangePosition.setLeverage(Integer.parseInt(jsonObject.getString("leverage")));
+            exchangePosition.setLiquidationPrice(new BigDecimal(jsonObject.getString("liquidationPrice")));
+            list.add(exchangePosition);
+        }
+        return list.size() == 0 ? null : list;
+    }
 
     private Interval convertInterval(ExchangeIntervalEnum interval) {
         return Interval.fromValue(interval.getValue());

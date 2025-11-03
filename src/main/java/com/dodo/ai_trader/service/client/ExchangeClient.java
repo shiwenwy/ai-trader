@@ -2,6 +2,7 @@ package com.dodo.ai_trader.service.client;
 
 import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
 import com.dodo.ai_trader.service.model.market.ExchangeBalance;
+import com.dodo.ai_trader.service.model.market.ExchangePosition;
 import com.dodo.ai_trader.service.model.market.FundingRate;
 import com.dodo.ai_trader.service.model.market.KLine;
 
@@ -38,4 +39,11 @@ public interface ExchangeClient {
      * @return
      */
     ExchangeBalance getBalance();
+
+    /**
+     * 获取交易所账户持仓
+     * @param symbol
+     * @return
+     */
+    List<ExchangePosition> getPosition(String symbol);
 }

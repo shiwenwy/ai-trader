@@ -269,5 +269,8 @@ class AiTraderApplicationTests {
 
 	@Test
 	public void test8() {
+
+		ApiResponse<PositionInformationV2Response> btcusdt = binanceFuturesRestApi.positionInformationV2("BTCUSDT", null);
+		System.out.println(btcusdt.getData().toJson());
 	}
 }
