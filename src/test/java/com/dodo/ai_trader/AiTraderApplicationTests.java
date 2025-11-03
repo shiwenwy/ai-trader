@@ -266,4 +266,8 @@ class AiTraderApplicationTests {
 		ApiResponse<GetFundingRateHistoryResponse> btcusdt = binanceFuturesRestApi.getFundingRateHistory("BTCUSDT", null, null, 5L);
 		System.out.println(btcusdt.getData().toJson());
 	}
+
+	@Test
+	public void test8() {
+	}
 }
