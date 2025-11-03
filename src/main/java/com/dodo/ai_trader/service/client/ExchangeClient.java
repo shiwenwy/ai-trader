@@ -1,6 +1,7 @@
 package com.dodo.ai_trader.service.client;
 
 import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
+import com.dodo.ai_trader.service.model.market.ExchangeBalance;
 import com.dodo.ai_trader.service.model.market.FundingRate;
 import com.dodo.ai_trader.service.model.market.KLine;
 
@@ -31,4 +32,10 @@ public interface ExchangeClient {
      * @return
      */
     List<FundingRate> getLastFundingRate(String symbol);
+
+    /**
+     * 获取交易所账户余额
+     * @return
+     */
+    ExchangeBalance getBalance();
 }

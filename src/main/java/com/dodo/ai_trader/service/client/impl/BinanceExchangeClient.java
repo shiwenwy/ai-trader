@@ -5,12 +5,10 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.binance.connector.client.common.ApiResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.DerivativesTradingUsdsFuturesRestApi;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.GetFundingRateHistoryResponse;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.Interval;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.KlineCandlestickDataResponse;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.OpenInterestResponse;
+import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.*;
 import com.dodo.ai_trader.service.client.ExchangeClient;
 import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
+import com.dodo.ai_trader.service.model.market.ExchangeBalance;
 import com.dodo.ai_trader.service.model.market.FundingRate;
 import com.dodo.ai_trader.service.model.market.KLine;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +78,17 @@ public class BinanceExchangeClient implements ExchangeClient {
             list.add(fundingRate);
         }
         return list;
+    }
+
+    @Override
+    public ExchangeBalance getBalance() {
+        ApiResponse<AccountInformationV3Response> informationV3 = binanceFuturesRestApi.accountInformationV3(5000L);
+        JSONObject data = JSON.parseObject(informationV3.getData().toJson());
+        ExchangeBalance exchangeBalance = new ExchangeBalance();
+        exchangeBalance.setTotalWalletBalance(new BigDecimal(data.getString("totalWalletBalance")));
+        exchangeBalance.setTotalUnrealizedProfit(new BigDecimal(data.getString("totalUnrealizedProfit")));
+        exchangeBalance.setAvailableBalance(new BigDecimal(data.getString("availableBalance")));
+        return exchangeBalance;
     }
 
 

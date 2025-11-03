@@ -226,7 +226,7 @@ class AiTraderApplicationTests {
 
 	@Test
 	public void test2() {
-		ApiResponse<AccountInformationV2Response> informationV3 = binanceFuturesRestApi.accountInformationV2(5000L);
+		ApiResponse<AccountInformationV3Response> informationV3 = binanceFuturesRestApi.accountInformationV3(5000L);
 		System.out.println(informationV3.getData().toJson());
 	}
 
