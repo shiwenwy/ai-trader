@@ -28,6 +28,13 @@ public interface ExchangeClient {
     BigDecimal getOpenInterest(String symbol);
 
     /**
+     * 获取合约平均未平仓合约数
+     * @param symbol
+     * @return
+     */
+    BigDecimal getAvgOpenInterest(String symbol);
+
+    /**
      * 获取合约资金费率
      * @param symbol
      * @return

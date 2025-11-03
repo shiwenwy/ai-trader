@@ -63,6 +63,24 @@ public class BinanceExchangeClient implements ExchangeClient {
     }
 
     @Override
+    public BigDecimal getAvgOpenInterest(String symbol) {
+        ApiResponse<OpenInterestStatisticsResponse> apiResponse = binanceFuturesRestApi.openInterestStatistics(convertCommonPair(symbol), Period.PERIOD_1h, 24L, null, null);
+        if (apiResponse != null && apiResponse.getData() != null) {
+            JSONArray objects = JSON.parseArray(apiResponse.getData().toJson());
+            if (objects == null || objects.isEmpty()) {
+                return null;
+            }
+            BigDecimal total = BigDecimal.ZERO;
+            for (int i = 0; i < objects.size(); i++) {
+                JSONObject jsonObject = objects.getJSONObject(i);
+                total = total.add(new BigDecimal(jsonObject.getString("sumOpenInterest")));
+            }
+            return total.divide(new BigDecimal(objects.size()), 3, BigDecimal.ROUND_HALF_UP);
+        }
+        return null;
+    }
+
+    @Override
     public List<FundingRate> getLastFundingRate(String symbol) {
         ApiResponse<GetFundingRateHistoryResponse> fundingRateHistory = binanceFuturesRestApi.getFundingRateHistory(convertCommonPair(symbol), null, null, 5L);
 

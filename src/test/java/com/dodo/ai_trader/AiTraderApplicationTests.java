@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Flux;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -272,5 +273,23 @@ class AiTraderApplicationTests {
 
 		ApiResponse<PositionInformationV2Response> btcusdt = binanceFuturesRestApi.positionInformationV2("BTCUSDT", null);
 		System.out.println(btcusdt.getData().toJson());
+	}
+
+	@Test
+	public void test9() {
+		ApiResponse<OpenInterestResponse> btcusdt = binanceFuturesRestApi.openInterest("BTCUSDT");
+		System.out.println(btcusdt.getData().toJson());
+		ApiResponse<OpenInterestStatisticsResponse> btcusdt1 = binanceFuturesRestApi.openInterestStatistics("BTCUSDT", Period.PERIOD_1h, 5L, null, null);
+		System.out.println(btcusdt1.getData().toJson());
+	}
+
+	@Test
+	public void test10() {
+		ExchangeClient binance = exchangeClientMap.get("binance");
+		BigDecimal btc = binance.getAvgOpenInterest("BTC");
+		System.out.println(btc);
+
+		BigDecimal btc1 = binance.getOpenInterest("BTC");
+		System.out.println(btc1);
 	}
 }
