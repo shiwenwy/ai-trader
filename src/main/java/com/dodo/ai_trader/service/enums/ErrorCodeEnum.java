@@ -27,7 +27,7 @@ public enum ErrorCodeEnum {
     MERCHANT_NOT_EXIST("1009", "商户不存在"),
     GAS_NOT_ENOUGH("1010", "gas不足"),
     USER_PASSWORD_ERROR("1011", "用户密码错误"),
-    MERCHANT_EXIST("1012", "商户已存在"),
+    USER_EXIST("1012", "用户已存在"),
     USER_NOT_LOGIN("1013", "用户未登录或登录已过期"),
     NOTIFY_FAILED("1014", "通知失败"),
     ;

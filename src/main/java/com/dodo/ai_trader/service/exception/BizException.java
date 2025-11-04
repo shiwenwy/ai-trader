@@ -1,6 +1,7 @@
 package com.dodo.ai_trader.service.exception;
 
 
+import com.dodo.ai_trader.service.enums.ErrorCodeEnum;
 import lombok.Data;
 
 /**
@@ -18,6 +19,10 @@ public class BizException extends RuntimeException{
     private String msg;
 
     private boolean canRetry;
+
+    public BizException(ErrorCodeEnum errorCodeEnum, boolean canRetry) {
+        this(errorCodeEnum.getCode(), errorCodeEnum.getMsg(), canRetry);
+    }
 
     public BizException(String code, String msg, boolean canRetry) {
         this.code = code;

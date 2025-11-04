@@ -62,4 +62,15 @@ public class SharpeRatioCalculator {
         double sharpeRatio = meanReturn / stdDev;
         return sharpeRatio;
     }
+
+    public static void main(String[] args) {
+        List<Double> totalEquity = new ArrayList<>();
+        totalEquity.add(1000.0);
+        totalEquity.add(1001.0);
+        totalEquity.add(999.0);
+        totalEquity.add(999.0);
+
+        double sharpeRatio = calculateSharpeRatio(totalEquity);
+        System.out.println("夏普比率：" + sharpeRatio);
+    }
 }
