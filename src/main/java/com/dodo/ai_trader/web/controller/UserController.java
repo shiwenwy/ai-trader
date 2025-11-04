@@ -5,10 +5,13 @@ import com.dodo.ai_trader.service.enums.UserStatusEnum;
 import com.dodo.ai_trader.service.exception.BizException;
 import com.dodo.ai_trader.service.model.User;
 import com.dodo.ai_trader.service.repository.UserRepository;
+import com.dodo.ai_trader.service.service.AccountBillService;
+import com.dodo.ai_trader.service.utils.AssertUtil;
 import com.dodo.ai_trader.service.utils.IdGenerator;
 import com.dodo.ai_trader.service.utils.LogUtil;
 import com.dodo.ai_trader.service.utils.SHA256Util;
 import com.dodo.ai_trader.web.base.WebResult;
+import com.dodo.ai_trader.web.request.UserRechargeRequest;
 import com.dodo.ai_trader.web.request.UserRegisterRequest;
 import com.dodo.ai_trader.web.utils.ControllerUtil;
 import com.dodo.ai_trader.web.validator.UserValidator;
@@ -26,6 +29,8 @@ public class UserController {
     private UserRepository userRepository;
     @Autowired
     private UserValidator userValidator;
+    @Autowired
+    private AccountBillService accountBillService;
 
     @PostMapping("/register")
     @ResponseBody
@@ -46,6 +51,22 @@ public class UserController {
         userRepository.addUser(user);
 
         return WebResult.success(ControllerUtil.buildUserVO(user));
+    }
+
+    @PostMapping("/recharge")
+    @ResponseBody
+    @Operation(summary = "用户充值")
+    public WebResult<String> recharge(@RequestBody UserRechargeRequest request) {
+
+        userValidator.validateUserRechargeRequest(request);
+
+        User user = userRepository.getUserById(request.getUserId());
+        AssertUtil.notNull(user, ErrorCodeEnum.USER_NOT_EXIST, "用户不存在", false);
+
+        accountBillService.recharge(request.getOrderId(), request.getUserId(),
+                request.getCardId(), request.getAmount(), request.getCurrency());
+
+        return WebResult.success("充值成功");
     }
 
     private User buildNewUser(UserRegisterRequest request) {

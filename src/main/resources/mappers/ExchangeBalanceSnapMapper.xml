@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dodo.ai_trader.service.mapper.ExchangeBalanceSnapMapper">
+    <resultMap id="BaseResultMap" type="com.dodo.ai_trader.service.mapper.entity.ExchangeBalanceSnapEntity">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="user_id" property="userId" jdbcType="VARCHAR"/>
+        <result column="exchange" property="exchange" jdbcType="VARCHAR"/>
+        <result column="total_equity" property="totalEquity" jdbcType="DECIMAL"/>
+        <result column="total_wallet_balance" property="totalWalletBalance" jdbcType="DECIMAL"/>
+        <result column="total_unrealized_profit" property="totalUnrealizedProfit" jdbcType="DECIMAL"/>
+        <result column="available_balance" property="availableBalance" jdbcType="DECIMAL"/>
+        <result column="timestamp" property="timestamp" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, create_time, update_time, user_id, exchange, total_equity, total_wallet_balance, total_unrealized_profit, available_balance, timestamp
+    </sql>
+    
+    <insert id="insert" parameterType="com.dodo.ai_trader.service.mapper.entity.ExchangeBalanceSnapEntity">
+        insert into exchange_balance_snap (create_time, update_time, user_id, exchange, total_equity, total_wallet_balance, total_unrealized_profit, available_balance, timestamp)
+        values (now(), now(), #{userId}, #{exchange}, #{totalEquity}, #{totalWalletBalance}, #{totalUnrealizedProfit}, #{availableBalance}, #{timestamp})
+    </insert>
+
+    <select id="getLastBalanceSnapList" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from exchange_balance_snap
+        where user_id = #{userId}
+        and exchange = #{exchange}
+        order by timestamp desc, id desc
+        limit 24
+    </select>
+</mapper>
