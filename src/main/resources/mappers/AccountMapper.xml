@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dodo.ai_trader.service.mapper.AccountMapper">
+    <resultMap id="BaseResultMap" type="com.dodo.ai_trader.service.mapper.entity.AccountEntity">
+        <id property="id" column="id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="userId" column="user_id"/>
+        <result property="accountName" column="account_name"/>
+        <result property="availableBalance" column="available_balance"/>
+        <result property="balance" column="balance"/>
+        <result property="cardId" column="card_id"/>
+        <result property="currency" column="currency"/>
+        <result property="frozenBalance" column="frozen_balance"/>
+        <result property="status" column="status"/>
+        <result property="version" column="version"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, create_time, update_time, user_id, account_name, available_balance, balance, card_id, currency, frozen_balance, status, version
+    </sql>
+
+    <insert id="insert" parameterType="com.dodo.ai_trader.service.mapper.entity.AccountEntity">
+        insert into account (create_time, update_time, user_id, account_name, available_balance, balance, card_id, currency, frozen_balance, status, version)
+        values (now(), now(), #{userId}, #{accountName}, #{availableBalance}, #{balance}, #{cardId}, #{currency}, #{frozenBalance}, #{status}, #{version})
+    </insert>
+
+    <update id="updateAmount" parameterType="com.dodo.ai_trader.service.mapper.entity.AccountEntity">
+        update account
+        <set>
+            update_time = now(),
+            available_balance = #{availableBalance},
+            balance = #{balance},
+            frozen_balance = #{frozenBalance},
+            version = version + 1
+        </set>
+        where user_id = #{userId}
+        and card_id = #{cardId}
+        and currency = #{currency}
+        and version = #{version}
+    </update>
+
+    <update id="updateStatus">
+        update account
+        <set>
+            update_time = now(),
+            status = #{status},
+            version = version + 1
+        </set>
+        where user_id = #{userId}
+        and card_id = #{cardId}
+        and currency = #{currency}
+        and version = #{version}
+    </update>
+
+    <select id="queryAccount" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from account
+        where user_id = #{userId}
+        and card_id = #{cardId}
+        and currency = #{currency}
+    </select>
+
+    <select id="getAccountListByUserIdAndCardId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from account
+        where user_id = #{userId}
+        and card_id = #{cardId}
+    </select>
+</mapper>

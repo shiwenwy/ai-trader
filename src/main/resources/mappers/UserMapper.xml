@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dodo.ai_trader.service.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.dodo.ai_trader.service.mapper.entity.UserEntity">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="user_id" property="userId" jdbcType="VARCHAR"/>
+        <result column="nick_name" property="nickName" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="pay_password" property="payPassword" jdbcType="VARCHAR"/>
+        <result column="salt" property="salt" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="remark" property="remark" jdbcType="VARCHAR"/>
+        <result column="context" property="context" jdbcType="VARCHAR"/>
+        <result column="version" property="version" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, create_time, update_time, user_id, nick_name, password, pay_password, salt, email, status, remark, context, version
+    </sql>
+
+    <select id="getUserById" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from user_info
+        where user_id = #{userId}
+    </select>
+
+    <select id="getUserByEmail" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from user_info
+        where email = #{email}
+    </select>
+
+    <insert id="insert" parameterType="com.dodo.ai_trader.service.mapper.entity.UserEntity">
+        insert into user_info (create_time, update_time, user_id, nick_name, password, pay_password, salt, email, status, remark, context, version)
+        values (now(), now(), #{userId}, #{nickName}, #{password}, #{payPassword}, #{salt}, #{email}, #{status}, #{remark}, #{context}, #{version})
+    </insert>
+
+</mapper>

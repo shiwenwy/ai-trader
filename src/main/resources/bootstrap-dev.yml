@@ -1,7 +1,7 @@
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://localhost:3306/dex
+    url: jdbc:mysql://localhost:3306/ai_trader
     username: root
     password:
     druid:
