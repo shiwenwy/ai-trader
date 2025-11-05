@@ -42,4 +42,11 @@
         values (now(), now(), #{userId}, #{nickName}, #{password}, #{payPassword}, #{salt}, #{email}, #{status}, #{remark}, #{context}, #{version})
     </insert>
 
+    <select id="getAllEnableUsers" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from user_info
+        where status = 'ENABLE'
+    </select>
+
 </mapper>

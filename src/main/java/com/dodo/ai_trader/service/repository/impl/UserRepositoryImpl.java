@@ -14,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -38,6 +40,15 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User getUserByUserName(String email) {
         return convertToModel(userMapper.getUserByEmail(email));
+    }
+
+    @Override
+    public List<User> getAllEnableUsers() {
+        List<UserEntity> allEnableUsers = userMapper.getAllEnableUsers();
+        if (!CollectionUtils.isEmpty(allEnableUsers)) {
+            return allEnableUsers.stream().map(this::convertToModel).toList();
+        }
+        return null;
     }
 
 

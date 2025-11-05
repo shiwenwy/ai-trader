@@ -3,6 +3,8 @@ package com.dodo.ai_trader.service.mapper;
 import com.dodo.ai_trader.service.mapper.entity.UserEntity;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * Author: shiwen
  * Date: 2025/4/24 20:21
@@ -30,4 +32,10 @@ public interface UserMapper {
      * @return
      */
     UserEntity getUserByEmail(@Param("email") String email);
+
+    /**
+     * 查询所有用户信息
+     * @return
+     */
+    List<UserEntity> getAllEnableUsers();
 }

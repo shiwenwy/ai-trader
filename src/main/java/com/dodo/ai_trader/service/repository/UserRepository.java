@@ -2,6 +2,8 @@ package com.dodo.ai_trader.service.repository;
 
 import com.dodo.ai_trader.service.model.User;
 
+import java.util.List;
+
 public interface UserRepository {
 
     /**
@@ -24,4 +26,10 @@ public interface UserRepository {
      * @return
      */
     User getUserByUserName(String email);
+
+    /**
+     * 获取所有启用的用户
+     * @return
+     */
+    List<User> getAllEnableUsers();
 }
