@@ -5,6 +5,7 @@ import cn.hutool.json.JSONUtil;
 import com.binance.connector.client.common.ApiResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.DerivativesTradingUsdsFuturesRestApi;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.*;
+import com.dodo.ai_trader.service.Indicator.MiddlePriceCalculator;
 import com.dodo.ai_trader.service.client.ExchangeClient;
 import com.dodo.ai_trader.service.decision.BinanceDecision;
 import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
@@ -291,5 +292,12 @@ class AiTraderApplicationTests {
 
 		BigDecimal btc1 = binance.getOpenInterest("BTC");
 		System.out.println(btc1);
+	}
+
+	@Test
+	public void test11() {
+		ExchangeClient binance = exchangeClientMap.get("binance");
+		List<KLine> kLine = binance.getFuturesKLine("BTC", ExchangeIntervalEnum.INTERVAL_15m, 20);
+		System.out.println(MiddlePriceCalculator.calculateMiddlePrice(kLine).toString());
 	}
 }
