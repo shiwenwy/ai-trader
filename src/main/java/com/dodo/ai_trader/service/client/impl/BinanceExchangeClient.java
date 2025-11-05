@@ -27,6 +27,13 @@ public class BinanceExchangeClient implements ExchangeClient {
     private DerivativesTradingUsdsFuturesRestApi binanceFuturesRestApi;
 
     @Override
+    public BigDecimal getCurrentPrice(String symbol) {
+        ApiResponse<SymbolPriceTickerV2Response> priceTickerV2 = binanceFuturesRestApi.symbolPriceTickerV2(convertCommonPair(symbol));
+        JSONObject data = JSON.parseObject(priceTickerV2.getData().toJson());
+        return new BigDecimal(data.getString("price"));
+    }
+
+    @Override
     public List<KLine> getFuturesKLine(String symbol, ExchangeIntervalEnum interval, Integer limit) {
         ApiResponse<KlineCandlestickDataResponse> klines = binanceFuturesRestApi.klineCandlestickData(convertCommonPair(symbol), convertInterval(interval), null, null, limit.longValue());
         JSONArray objects = JSON.parseArray(klines.getData().toJson());

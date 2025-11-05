@@ -296,8 +296,11 @@ class AiTraderApplicationTests {
 
 	@Test
 	public void test11() {
+		ApiResponse<SymbolPriceTickerV2Response> btcusdt = binanceFuturesRestApi.symbolPriceTickerV2("BTCUSDT");
+		System.out.println(btcusdt.getData().toJson());
 		ExchangeClient binance = exchangeClientMap.get("binance");
-		List<KLine> kLine = binance.getFuturesKLine("BTC", ExchangeIntervalEnum.INTERVAL_15m, 20);
-		System.out.println(MiddlePriceCalculator.calculateMiddlePrice(kLine).toString());
+		BigDecimal price = binance.getCurrentPrice("BTC");
+		System.out.println(price);
 	}
+
 }

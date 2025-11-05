@@ -12,7 +12,9 @@ public class SharpeRatioCalculator {
      * @return 夏普比率
      */
     public static double calculateSharpeRatio(List<Double> totalEquity) {
-
+        if (totalEquity == null || totalEquity.isEmpty()) {
+            return 0.0;
+        }
         if (totalEquity.size() < 2) {
             return 0.0;
         }

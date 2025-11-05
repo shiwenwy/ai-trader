@@ -11,6 +11,9 @@ import java.util.List;
 
 public interface ExchangeClient {
 
+
+    BigDecimal getCurrentPrice(String symbol);
+
     /**
      * 获取合约K线数据
      * @param symbol
