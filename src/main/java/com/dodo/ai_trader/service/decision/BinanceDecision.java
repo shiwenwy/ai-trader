@@ -128,8 +128,8 @@ public class BinanceDecision {
         Prompt prompt = new Prompt(systemMessage, userMessaget);
         LogUtil.monitorLog("prompt: \n" + prompt.getContents());
 
-        return null;
-//        return chatClient.prompt(prompt).stream().content();
+//        return null;
+        return chatClient.prompt(prompt).stream().content();
     }
 
 }

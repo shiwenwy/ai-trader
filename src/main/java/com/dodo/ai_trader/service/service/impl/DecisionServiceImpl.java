@@ -9,11 +9,13 @@ import com.dodo.ai_trader.service.model.TokenIndicator;
 import com.dodo.ai_trader.service.model.market.MacdResult;
 import com.dodo.ai_trader.service.service.DecisionService;
 import com.dodo.ai_trader.service.utils.AiResParseUtil;
+import com.dodo.ai_trader.service.utils.AmountUtil;
 import com.dodo.ai_trader.service.utils.LogUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,9 +44,10 @@ public class DecisionServiceImpl implements DecisionService {
                 decisionContext.getSharpeRatio(), decisionContext.getAvailableBalance().doubleValue(),
                 decisionContext.getTotalEquity().doubleValue(), null, decisionContext.getInitTotalBalance().intValue());
 
-//        String result = decision.collectList().block().stream().collect(Collectors.joining());
-//        LogUtil.monitorLog("decision_result: \n" + result);
-//        String json = AiResParseUtil.parseAiRes(result).trim();
+        String result = decision.collectList().block().stream().collect(Collectors.joining());
+        LogUtil.monitorLog("decision_result: \n" + result);
+        String json = AiResParseUtil.parseAiRes(result).trim();
+        LogUtil.monitorLog("decision_result_json: \n" + json);
         return List.of();
     }
 
@@ -81,23 +84,23 @@ public class DecisionServiceImpl implements DecisionService {
     }
 
     // 格式化普通数值列表
-    private String formatList(List<?> list) {
+    private String formatList(List<BigDecimal> list) {
         if (list == null || list.isEmpty()) {
             return "";
         }
         return list.stream()
-                .map(Object::toString)
+                .map(amount -> AmountUtil.convertToString(amount))
                 .collect(Collectors.joining(", "));
     }
 
-    // 格式化MACD列表，提取BAR值
+    // 格式化MACD列表
     private String formatMacdList(List<MacdResult> macdList) {
         if (macdList == null || macdList.isEmpty()) {
             return "";
         }
         return macdList.stream()
                 .map(MacdResult::getMacdLine)
-                .map(Object::toString)
+                .map(amount -> AmountUtil.convertToString(amount))
                 .collect(Collectors.joining(", "));
     }
 
