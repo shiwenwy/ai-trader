@@ -5,6 +5,7 @@ import cn.hutool.json.JSONUtil;
 import com.binance.connector.client.common.ApiResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.DerivativesTradingUsdsFuturesRestApi;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.*;
+import com.dodo.ai_trader.biz.task.AutoTradeTask;
 import com.dodo.ai_trader.service.Indicator.MiddlePriceCalculator;
 import com.dodo.ai_trader.service.client.ExchangeClient;
 import com.dodo.ai_trader.service.decision.BinanceDecision;
@@ -301,6 +302,14 @@ class AiTraderApplicationTests {
 		ExchangeClient binance = exchangeClientMap.get("binance");
 		BigDecimal price = binance.getCurrentPrice("BTC");
 		System.out.println(price);
+	}
+
+	@Autowired
+	private AutoTradeTask autoTradeTask;
+
+	@Test
+	public void test12() {
+		autoTradeTask.binanceAutoTrade();
 	}
 
 }

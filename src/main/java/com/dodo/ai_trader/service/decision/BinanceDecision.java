@@ -2,7 +2,9 @@ package com.dodo.ai_trader.service.decision;
 
 import cn.hutool.json.JSONUtil;
 import com.dodo.ai_trader.service.config.BizConfig;
+import com.dodo.ai_trader.service.config.TradeConfig;
 import com.dodo.ai_trader.service.model.CommonPosition;
+import com.dodo.ai_trader.service.utils.LogUtil;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -24,7 +26,7 @@ public class BinanceDecision {
     @Autowired
     private ChatClient chatClient;
     @Autowired
-    private BizConfig bizConfig;
+    private TradeConfig tradeConfig;
 
     @Value("classpath:/prompts/binance-system-message.mustache")
     private Resource systemResource;
@@ -41,21 +43,34 @@ public class BinanceDecision {
             "  \"stop_loss\": <float>,\n" +
             "  \"invalidation_condition\": \"<string>\",\n" +
             "  \"confidence\": <float 0-1>,\n" +
-            "  \"risk_usd\": <float>,\n" +
+            "  \"entry_price\": <float>,\n" +
             "  \"justification\": \"<string>\"\n" +
             "}";
+
+    private static String waitJson = "[\n" +
+            "  {\n" +
+            "    \"symbol\": \"MARKET\",\n" +
+            "    \"action\": \"wait\",\n" +
+            "    \"reasoning\": \"市场震荡，无明确信号，等待更好机会\"\n" +
+            "  }\n" +
+            "]";
+
+    public static void main(String[] args) {
+        System.out.println(jsonFormat);
+    }
 
     public Message buildSystemMessage(Integer initialFunding) {
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("initialFunding", initialFunding);
-        variables.put("altcoinMin", bizConfig.getAltcoinMin());
-        variables.put("altcoinMax", bizConfig.getAltcoinMax());
-        variables.put("altcoinLeverage", bizConfig.getAltcoinLeverage());
-        variables.put("btcMin", bizConfig.getBtcMin());
-        variables.put("btcMax", bizConfig.getBtcMax());
-        variables.put("btcLeverage", bizConfig.getBtcLeverage());
+        variables.put("altcoinMin", tradeConfig.getAltcoinMin());
+        variables.put("altcoinMax", tradeConfig.getAltcoinMax());
+        variables.put("altcoinLeverage", tradeConfig.getAltcoinLeverage());
+        variables.put("btcMin", tradeConfig.getBtcMin());
+        variables.put("btcMax", tradeConfig.getBtcMax());
+        variables.put("btcLeverage", tradeConfig.getBtcLeverage());
         variables.put("jsonFormat", jsonFormat);
+        variables.put("waitJson", waitJson);
         SystemPromptTemplate template = new SystemPromptTemplate(systemResource);
         return template.createMessage(variables);
     }
@@ -110,7 +125,11 @@ public class BinanceDecision {
         Message userMessaget = buildUserMessage(minutesElapsed, btcData, ethData, solData, bnbData,
                 returnPct, sharpeRatio, cashAvailable, accountValue, currPositions);
 
-        return chatClient.prompt(new Prompt(systemMessage, userMessaget)).stream().content();
+        Prompt prompt = new Prompt(systemMessage, userMessaget);
+        LogUtil.monitorLog("prompt: \n" + prompt.getContents());
+
+        return null;
+//        return chatClient.prompt(prompt).stream().content();
     }
 
 }

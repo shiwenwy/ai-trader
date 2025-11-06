@@ -25,7 +25,7 @@ public class ExchangeSyncTask {
     @Autowired
     private UserRepository userRepository;
 
-    @Scheduled(cron = "0 * * * * ?")
+//    @Scheduled(cron = "0 * * * * ?")
     public void binanceBalanceSync() {
         ExchangeClient binance = exchangeClientMap.get("binance");
         ExchangeBalance balance = binance.getBalance();

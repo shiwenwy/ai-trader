@@ -17,9 +17,30 @@ public class DecisionContext implements Serializable {
 
     private String exchange;
 
+    /**
+     * 初始总资产
+     */
     private BigDecimal initTotalBalance;
 
+    /**
+     * 账户总收益率
+     */
+    private Double returnPct;
+
+    /**
+     * 夏普比率
+     */
     private Double sharpeRatio;
+
+    /**
+     * 可用余额, 仅计算usdt资产
+     */
+    private BigDecimal availableBalance;
+
+    /**
+     * 账户总余额, 仅计算usdt资产
+     */
+    private BigDecimal totalEquity;
 
     private Map<String, TokenIndicator> tokenIndicatorsMap;
 }

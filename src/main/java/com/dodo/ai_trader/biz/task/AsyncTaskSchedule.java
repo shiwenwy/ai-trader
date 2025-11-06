@@ -29,7 +29,7 @@ public class AsyncTaskSchedule {
 
     private final List<String> allExecuteTaskTypeList = List.of("TEST_TASK");
 
-    @Scheduled(cron = "0/10 * * * * ?")
+//    @Scheduled(cron = "0/10 * * * * ?")
     public void executeAllAsyncTask() {
 
         System.out.println("Start executing scheduled common task");

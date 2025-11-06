@@ -23,7 +23,7 @@ public class AutoTradeTask {
 
     @Scheduled(cron = "0 */15 * * * ?")
     public void binanceAutoTrade() {
-
+        System.out.println("开始执行自动交易任务...");
         DecisionContext context = dataContextService.getDecisionContext(SystemConstant.DEFAULT_USER_ID, "binance");
         List<Signal> signalList = decisionService.decide(context);
     }

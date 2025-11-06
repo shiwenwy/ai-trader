@@ -19,14 +19,16 @@ spring:
       connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
 
 
-biz:
+
+trade:
   config:
-    altcoinMin: 100
-    altcoinMax: 1000
+    altcoinMin: 10
+    altcoinMax: 100
     altcoinLeverage: 5
-    btcMin: 200
-    btcMax: 2000
+    btcMin: 20
+    btcMax: 100
     btcLeverage: 10
+
 
 
 bn:

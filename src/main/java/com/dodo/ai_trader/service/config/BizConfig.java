@@ -8,16 +8,4 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "biz.config")
 @Data
 public class BizConfig {
-
-    private Integer altcoinMin;
-
-    private Integer altcoinMax;
-
-    private Integer altcoinLeverage;
-
-    private Integer btcMin;
-
-    private Integer btcMax;
-
-    private Integer btcLeverage;
 }

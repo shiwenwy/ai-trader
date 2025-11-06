@@ -6,6 +6,7 @@ import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
 import com.dodo.ai_trader.service.model.Account;
 import com.dodo.ai_trader.service.model.DecisionContext;
 import com.dodo.ai_trader.service.model.TokenIndicator;
+import com.dodo.ai_trader.service.model.market.ExchangeBalance;
 import com.dodo.ai_trader.service.model.market.FundingRate;
 import com.dodo.ai_trader.service.model.market.KLine;
 import com.dodo.ai_trader.service.repository.AccountRepository;
@@ -54,6 +55,26 @@ public class DataContextServiceImpl implements DataContextService {
                 "BNB", bnb,
                 "SOL", sol
         ));
+
+        ExchangeClient binance = exchangeClientMap.get("binance");
+        ExchangeBalance balance = binance.getBalance();
+
+        decisionContext.setAvailableBalance(balance.getAvailableBalance());
+        decisionContext.setTotalEquity(balance.calculateTotalEquity());
+
+        // 计算回报率的优化版本
+        BigDecimal totalEquity = balance.calculateTotalEquity();
+        BigDecimal initBalance = decisionContext.getInitTotalBalance();
+
+        // 防止除零异常
+        if (initBalance != null && initBalance.compareTo(BigDecimal.ZERO) != 0) {
+            BigDecimal returnPct = totalEquity
+                    .divide(initBalance, 8, java.math.RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100));
+            decisionContext.setReturnPct(returnPct.doubleValue());
+        } else {
+            decisionContext.setReturnPct(0.0);
+        }
 
         return decisionContext;
     }
