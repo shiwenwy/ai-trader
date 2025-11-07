@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dodo.ai_trader.service.mapper.DecisionResultMapper">
+    <resultMap id="BaseResultMap" type="com.dodo.ai_trader.service.mapper.entity.DecisionResultEntity">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="user_id" property="userId" jdbcType="VARCHAR"/>
+        <result column="exchange" property="exchange" jdbcType="VARCHAR"/>
+        <result column="thinking" property="thinking" jdbcType="VARCHAR"/>
+        <result column="signal_list" property="signalList" jdbcType="VARCHAR"/>
+        <result column="timestamp" property="timestamp" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, create_time, update_time, user_id, exchange, thinking, signal_list, timestamp
+    </sql>
+
+    <insert id="insert" parameterType="com.dodo.ai_trader.service.mapper.entity.DecisionResultEntity">
+        insert into decision_result (create_time, update_time, user_id, exchange, thinking, signal_list, timestamp)
+        values (now(), now(), #{userId}, #{exchange}, #{thinking}, #{signalList}, #{timestamp})
+    </insert>
+
+    <select id="getLastDecisionResult" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from decision_result
+        where user_id = #{userId}
+        and exchange = #{exchange}
+        order by timestamp desc
+        limit #{limit}
+    </select>
+</mapper>

@@ -70,3 +70,31 @@ CREATE TABLE `user_info` (
   UNIQUE KEY `uk_user_id` (`user_id`),
   UNIQUE KEY `uk_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户信息表';
+
+CREATE TABLE `exchange_balance_snap` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `user_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '用户ID',
+  `exchange` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '交易所',
+  `total_equity` decimal(65,18) DEFAULT NULL COMMENT '账户总资产, 总资产+Pnl',
+  `total_wallet_balance` decimal(65,18) DEFAULT NULL COMMENT '账户总余额, 仅计算usdt资产',
+  `total_unrealized_profit` decimal(65,18) DEFAULT NULL COMMENT '持仓未实现盈亏总额, 仅计算usdt资产',
+  `available_balance` decimal(65,18) DEFAULT NULL COMMENT '可用余额, 仅计算usdt资产',
+  `timestamp` bigint NOT NULL COMMENT '时间戳',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='交易所余额快照表';
+
+CREATE TABLE ai_trader.`decision_result` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `user_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '用户ID',
+  `exchange` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '交易所',
+  `thinking` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '思维链分析',
+  `signal_list` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '信号列表',
+  `timestamp` bigint NOT NULL COMMENT '时间戳',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='信号决策结果表';

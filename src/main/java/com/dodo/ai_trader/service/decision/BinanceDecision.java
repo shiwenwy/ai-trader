@@ -121,14 +121,16 @@ public class BinanceDecision {
                                     Map<String, Object> bnbData, double returnPct,
                                     double sharpeRatio, double cashAvailable, double accountValue,
                                     List<CommonPosition> currPositions, Integer initialFunding) {
+
         Message systemMessage = buildSystemMessage(initialFunding);
-        Message userMessaget = buildUserMessage(minutesElapsed, btcData, ethData, solData, bnbData,
+
+        Message userMessage = buildUserMessage(minutesElapsed, btcData, ethData, solData, bnbData,
                 returnPct, sharpeRatio, cashAvailable, accountValue, currPositions);
 
-        Prompt prompt = new Prompt(systemMessage, userMessaget);
-        LogUtil.monitorLog("prompt: \n" + prompt.getContents());
+        Prompt prompt = new Prompt(systemMessage, userMessage);
 
-//        return null;
+        LogUtil.monitorLog("binance futures prompt: \n" + prompt.getContents());
+
         return chatClient.prompt(prompt).stream().content();
     }
 
