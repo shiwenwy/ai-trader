@@ -1,9 +1,13 @@
 package com.dodo.ai_trader.service.service.impl;
 
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.dodo.ai_trader.service.client.ExchangeClient;
 import com.dodo.ai_trader.service.config.TradeConfig;
 import com.dodo.ai_trader.service.decision.BinanceDecision;
+import com.dodo.ai_trader.service.enums.SignalEnum;
 import com.dodo.ai_trader.service.model.DecisionContext;
+import com.dodo.ai_trader.service.model.DecisionResult;
 import com.dodo.ai_trader.service.model.Signal;
 import com.dodo.ai_trader.service.model.TokenIndicator;
 import com.dodo.ai_trader.service.model.market.MacdResult;
@@ -11,11 +15,13 @@ import com.dodo.ai_trader.service.service.DecisionService;
 import com.dodo.ai_trader.service.utils.AiResParseUtil;
 import com.dodo.ai_trader.service.utils.AmountUtil;
 import com.dodo.ai_trader.service.utils.LogUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +38,7 @@ public class DecisionServiceImpl implements DecisionService {
     private Map<String, ExchangeClient> exchangeClientMap;
 
     @Override
-    public List<Signal> decide(DecisionContext decisionContext) {
+    public DecisionResult decide(DecisionContext decisionContext) {
 
         Map<String, Object> btc = getTokenData(decisionContext.getTokenIndicatorsMap().get("BTC"));
         Map<String, Object> eth = getTokenData(decisionContext.getTokenIndicatorsMap().get("ETH"));
@@ -47,7 +53,58 @@ public class DecisionServiceImpl implements DecisionService {
         String result = decision.collectList().block().stream().collect(Collectors.joining());
         LogUtil.monitorLog("decision_result: \n" + result);
         String json = AiResParseUtil.parseAiRes(result).trim();
-        return List.of();
+
+        List<Signal> signals = parseDecisionJson(json);
+        DecisionResult decisionResult = new DecisionResult();
+        decisionResult.setUserId(decisionContext.getUserId());
+        decisionResult.setExchange(decisionContext.getExchange());
+        decisionResult.setThinking(AiResParseUtil.parseAiThought(result));
+        decisionResult.setSignalList(signals);
+        return decisionResult;
+    }
+
+    private List<Signal> parseDecisionJson(String json) {
+        if (json == null || json.isEmpty()) {
+            return null;
+        }
+
+        JSONArray jsonArray = JSONArray.parseArray(json);
+        List<Signal> signals = new ArrayList<>(jsonArray.size());
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            Signal signal = new Signal();
+            String action = jsonObject.getString("action");
+            String symbol = jsonObject.getString("symbol");
+            if (StringUtils.isNotBlank(action) && StringUtils.isNotBlank(symbol)) {
+                signal.setSignal(SignalEnum.getByCode(action));
+                signal.setCoin(symbol);
+            } else {
+                String signalStr = jsonObject.getString("signal");
+
+                signal.setSignal(SignalEnum.getByCode(signalStr));
+                signal.setCoin(jsonObject.getString("coin"));
+            }
+
+            signal.setInvalidationCondition(jsonObject.getString("invalidation_condition"));
+            signal.setJustification(jsonObject.getString("justification"));
+            signal.setConfidence(jsonObject.getDouble("confidence"));
+
+            if (signal.getSignal() == SignalEnum.HOLD || signal.getSignal() == SignalEnum.CLOSE
+                    || signal.getSignal() == SignalEnum.WAIT) {
+
+                signals.add(signal);
+                continue;
+            }
+
+            signal.setEntryPrice(new BigDecimal(jsonObject.getString("entry_price")));
+            signal.setQuantity(new BigDecimal(jsonObject.getString("quantity")));
+            signal.setLeverage(jsonObject.getInteger("leverage"));
+            signal.setProfitTarget(new BigDecimal(jsonObject.getString("profit_target")));
+            signal.setStopLoss(new BigDecimal(jsonObject.getString("stop_loss")));
+
+            signals.add(signal);
+        }
+        return signals;
     }
 
     private Map<String, Object> getTokenData(TokenIndicator tokenIndicator) {

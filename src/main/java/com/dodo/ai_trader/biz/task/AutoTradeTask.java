@@ -2,6 +2,7 @@ package com.dodo.ai_trader.biz.task;
 
 import com.dodo.ai_trader.service.constant.SystemConstant;
 import com.dodo.ai_trader.service.model.DecisionContext;
+import com.dodo.ai_trader.service.model.DecisionResult;
 import com.dodo.ai_trader.service.model.Signal;
 import com.dodo.ai_trader.service.service.DataContextService;
 import com.dodo.ai_trader.service.service.DecisionService;
@@ -25,6 +26,9 @@ public class AutoTradeTask {
     public void binanceAutoTrade() {
         System.out.println("开始执行自动交易任务...");
         DecisionContext context = dataContextService.getDecisionContext(SystemConstant.DEFAULT_USER_ID, "binance");
-        List<Signal> signalList = decisionService.decide(context);
+        DecisionResult decisionResult = decisionService.decide(context);
+        System.out.println("自动交易结果：");
+        System.out.println(decisionResult);
+        System.out.println();
     }
 }
