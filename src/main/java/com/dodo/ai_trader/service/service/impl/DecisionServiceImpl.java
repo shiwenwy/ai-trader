@@ -47,7 +47,6 @@ public class DecisionServiceImpl implements DecisionService {
         String result = decision.collectList().block().stream().collect(Collectors.joining());
         LogUtil.monitorLog("decision_result: \n" + result);
         String json = AiResParseUtil.parseAiRes(result).trim();
-        LogUtil.monitorLog("decision_result_json: \n" + json);
         return List.of();
     }
 
