@@ -1,5 +1,6 @@
 package com.dodo.ai_trader.service.utils;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
 
@@ -24,4 +25,7 @@ public class IdGenerator {
         return IdUtil.fastSimpleUUID().substring(0, 10);
     }
 
+    public static String generateClosePositionTaskId(String coin) {
+        return DateUtil.format(DateUtil.date(), "yyyyMMddHHmm") + "_" + coin;
+    }
 }
