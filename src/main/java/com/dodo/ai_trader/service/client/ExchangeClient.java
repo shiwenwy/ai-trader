@@ -60,13 +60,15 @@ public interface ExchangeClient {
 
     /**
      * 开多仓位
+     * @param bizId
      * @param signal
      */
-    void openLongPosition(Signal signal);
+    void openLongPosition(String bizId, Signal signal);
 
     /**
      * 开空仓位
+     * @param bizId
      * @param signal
      */
-    void openShortPosition(Signal signal);
+    void openShortPosition(String bizId, Signal signal);
 }

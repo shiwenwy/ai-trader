@@ -28,4 +28,8 @@ public class IdGenerator {
     public static String generateClosePositionTaskId(String coin) {
         return DateUtil.format(DateUtil.date(), "yyyyMMddHHmm") + "_" + coin;
     }
+
+    public static String generateOpenPositionTaskId(String coin) {
+        return DateUtil.format(DateUtil.date(), "yyyyMMddHHmm") + "_" + coin;
+    }
 }

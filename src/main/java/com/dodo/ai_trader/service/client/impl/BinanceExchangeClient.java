@@ -149,7 +149,7 @@ public class BinanceExchangeClient implements ExchangeClient {
     }
 
     @Override
-    public void openLongPosition(Signal signal) {
+    public void openLongPosition(String bizId, Signal signal) {
         changeMarginType(signal.getCoin());
         BigDecimal currentPrice = getCurrentPrice(signal.getCoin());
         if (signal.getEntryPrice().compareTo(currentPrice) > 0) {
@@ -193,7 +193,7 @@ public class BinanceExchangeClient implements ExchangeClient {
     }
 
     @Override
-    public void openShortPosition(Signal signal) {
+    public void openShortPosition(String bizId, Signal signal) {
 
     }
 

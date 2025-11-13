@@ -12,6 +12,7 @@ public enum TaskTypeEnum {
     TOKEN_INFO_SYNC("TOKEN_INFO_SYNC", "代币信息同步"),
     TOKEN_DELIST("TOKEN_DELIST", "代币下架"),
     CLOSE_POSITION("CLOSE_POSITION", "平仓"),
+    OPEN_POSITION("OPEN_POSITION", "开仓"),
     ;
 
     private String code;

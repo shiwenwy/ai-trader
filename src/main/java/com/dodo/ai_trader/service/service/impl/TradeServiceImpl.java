@@ -1,5 +1,7 @@
 package com.dodo.ai_trader.service.service.impl;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import com.dodo.ai_trader.service.client.ExchangeClient;
 import com.dodo.ai_trader.service.enums.SignalEnum;
 import com.dodo.ai_trader.service.enums.TaskTypeEnum;
@@ -15,6 +17,8 @@ import com.dodo.ai_trader.service.utils.TaskUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.Date;
 import java.util.Map;
 
 @Service
@@ -72,6 +76,16 @@ public class TradeServiceImpl implements TradeService {
         asyncTaskRepository.saveAsyncTask(asyncTask);
     }
 
+    private String handleOpenPosition(String userId, String exchange, Signal signal) {
+        AsyncTask asyncTask = TaskUtil.buildAsyncTask(TaskTypeEnum.OPEN_POSITION,
+                IdGenerator.generateOpenPositionTaskId(signal.getCoin()), userId);
+        asyncTask.addExtInfo("signal", signal);
+        asyncTask.addExtInfo("exchange", exchange);
+        asyncTask.setNextExecuteTime(DateUtil.offset(new Date(), DateField.SECOND,40));
+        asyncTaskRepository.saveAsyncTask(asyncTask);
+        return asyncTask.getBizId();
+    }
+
     private void handleOpenLongPosition(String userId, String exchange, Signal signal) {
         if (signal.getSignal() != SignalEnum.BUY_TO_ENTER) {
             return;
@@ -79,8 +93,9 @@ public class TradeServiceImpl implements TradeService {
         if (signal.getEntryPrice().compareTo(signal.getStopLoss()) < 0 || signal.getEntryPrice().compareTo(signal.getProfitTarget()) > 0) {
             return;
         }
+        String bizId = handleOpenPosition(userId, exchange, signal);
         ExchangeClient exchangeClient = exchangeClientMap.get(exchange);
-        exchangeClient.openLongPosition(signal);
+        exchangeClient.openLongPosition(bizId, signal);
     }
 
     private void handleOpenShortPosition(String userId, String exchange, Signal signal) {
@@ -90,7 +105,8 @@ public class TradeServiceImpl implements TradeService {
         if (signal.getEntryPrice().compareTo(signal.getStopLoss()) > 0 || signal.getEntryPrice().compareTo(signal.getProfitTarget()) < 0) {
             return;
         }
+        String bizId = handleOpenPosition(userId, exchange, signal);
         ExchangeClient exchangeClient = exchangeClientMap.get(exchange);
-        exchangeClient.openShortPosition(signal);
+        exchangeClient.openShortPosition(bizId, signal);
     }
 }
