@@ -38,8 +38,6 @@ public class TradeServiceImpl implements TradeService {
             return;
         }
 
-
-
         for (Signal signal : decisionResult.getSignalList()) {
             LogUtil.serviceLog("处理信号,signal={}", signal);
             boolean beforeTrade = riskCheckBeforeTrade(decisionResult.getUserId(), decisionResult.getExchange(), signal);
@@ -88,12 +86,13 @@ public class TradeServiceImpl implements TradeService {
             LogUtil.serviceLog("账户可用余额低于总余额30%,请充值");
             return false;
         }
-        if (balance.getAvailableBalance().compareTo(signal.getEntryPrice().multiply(signal.getQuantity())) < 0) {
-            LogUtil.serviceLog("账户开仓可用余额不足,请充值");
+        if (signal.getCoin().equals("BTC") && signal.getConfidence() < 0.8) {
+            LogUtil.serviceLog("BTC币种信号idence小于0.8,请重新获取");
             return false;
         }
         List<ExchangePosition> position = exchangeClient.getPosition(signal.getCoin());
         if (!CollectionUtils.isEmpty(position)) {
+
             for (ExchangePosition exchangePosition : position) {
                 if ((exchangePosition.getSide() == SideEnum.LONG && signal.getSignal() == SignalEnum.BUY_TO_ENTER)
                         || (exchangePosition.getSide() == SideEnum.SHORT && signal.getSignal() == SignalEnum.SELL_TO_ENTER)) {
@@ -105,10 +104,14 @@ public class TradeServiceImpl implements TradeService {
                     return false;
                 }
             }
+
+            if (position.size() >= 3) {
+                LogUtil.serviceLog("账户已存在3个币种持仓,不在新增仓位");
+                return false;
+            }
         }
 
         return true;
     }
-
 
 }

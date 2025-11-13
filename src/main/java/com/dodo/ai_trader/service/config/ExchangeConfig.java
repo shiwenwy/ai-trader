@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import static com.dodo.ai_trader.service.utils.SHA256Util.decryptAESFromHex;
+import static com.dodo.ai_trader.service.utils.SHA256Util.encryptAESHax;
 
 @Configuration
 public class ExchangeConfig {
