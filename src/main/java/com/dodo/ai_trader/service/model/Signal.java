@@ -29,7 +29,7 @@ public class Signal implements Serializable {
     private BigDecimal entryPrice;
 
     /**
-     * 订单数量
+     * 投入的保证金金额
      */
     private BigDecimal quantity;
 
