@@ -1,6 +1,7 @@
 package com.dodo.ai_trader.service.client;
 
 import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
+import com.dodo.ai_trader.service.model.Signal;
 import com.dodo.ai_trader.service.model.market.ExchangeBalance;
 import com.dodo.ai_trader.service.model.market.ExchangePosition;
 import com.dodo.ai_trader.service.model.market.FundingRate;
@@ -56,4 +57,16 @@ public interface ExchangeClient {
      * @return
      */
     List<ExchangePosition> getPosition(String symbol);
+
+    /**
+     * 开多仓位
+     * @param signal
+     */
+    void openLongPosition(Signal signal);
+
+    /**
+     * 开空仓位
+     * @param signal
+     */
+    void openShortPosition(Signal signal);
 }

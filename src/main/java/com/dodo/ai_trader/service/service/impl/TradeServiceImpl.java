@@ -1,14 +1,11 @@
 package com.dodo.ai_trader.service.service.impl;
 
 import com.dodo.ai_trader.service.client.ExchangeClient;
-import com.dodo.ai_trader.service.enums.SideEnum;
 import com.dodo.ai_trader.service.enums.SignalEnum;
 import com.dodo.ai_trader.service.enums.TaskTypeEnum;
 import com.dodo.ai_trader.service.model.AsyncTask;
 import com.dodo.ai_trader.service.model.DecisionResult;
 import com.dodo.ai_trader.service.model.Signal;
-import com.dodo.ai_trader.service.model.market.ExchangeBalance;
-import com.dodo.ai_trader.service.model.market.ExchangePosition;
 import com.dodo.ai_trader.service.repository.AsyncTaskRepository;
 import com.dodo.ai_trader.service.service.RiskService;
 import com.dodo.ai_trader.service.service.TradeService;
@@ -18,9 +15,6 @@ import com.dodo.ai_trader.service.utils.TaskUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -51,9 +45,11 @@ public class TradeServiceImpl implements TradeService {
             switch (signal.getSignal()) {
                 case BUY_TO_ENTER:
                     LogUtil.serviceLog("BUY_TO_ENTER");
+                    handleOpenLongPosition(decisionResult.getUserId(), decisionResult.getExchange(), signal);
                     break;
                 case SELL_TO_ENTER:
                     LogUtil.serviceLog("SELL_TO_ENTER");
+                    handleOpenShortPosition(decisionResult.getUserId(), decisionResult.getExchange(), signal);
                     break;
                 case HOLD:
                     LogUtil.serviceLog("HOLD");
@@ -74,5 +70,27 @@ public class TradeServiceImpl implements TradeService {
         AsyncTask asyncTask = TaskUtil.buildAsyncTask(TaskTypeEnum.CLOSE_POSITION,
                 IdGenerator.generateClosePositionTaskId(coin), userId);
         asyncTaskRepository.saveAsyncTask(asyncTask);
+    }
+
+    private void handleOpenLongPosition(String userId, String exchange, Signal signal) {
+        if (signal.getSignal() != SignalEnum.BUY_TO_ENTER) {
+            return;
+        }
+        if (signal.getEntryPrice().compareTo(signal.getStopLoss()) < 0 || signal.getEntryPrice().compareTo(signal.getProfitTarget()) > 0) {
+            return;
+        }
+        ExchangeClient exchangeClient = exchangeClientMap.get(exchange);
+        exchangeClient.openLongPosition(signal);
+    }
+
+    private void handleOpenShortPosition(String userId, String exchange, Signal signal) {
+        if (signal.getSignal() != SignalEnum.SELL_TO_ENTER) {
+            return;
+        }
+        if (signal.getEntryPrice().compareTo(signal.getStopLoss()) > 0 || signal.getEntryPrice().compareTo(signal.getProfitTarget()) < 0) {
+            return;
+        }
+        ExchangeClient exchangeClient = exchangeClientMap.get(exchange);
+        exchangeClient.openShortPosition(signal);
     }
 }

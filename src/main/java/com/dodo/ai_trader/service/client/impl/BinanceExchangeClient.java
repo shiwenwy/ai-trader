@@ -9,10 +9,12 @@ import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.
 import com.dodo.ai_trader.service.client.ExchangeClient;
 import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
 import com.dodo.ai_trader.service.enums.SideEnum;
+import com.dodo.ai_trader.service.model.Signal;
 import com.dodo.ai_trader.service.model.market.ExchangeBalance;
 import com.dodo.ai_trader.service.model.market.ExchangePosition;
 import com.dodo.ai_trader.service.model.market.FundingRate;
 import com.dodo.ai_trader.service.model.market.KLine;
+import com.dodo.ai_trader.service.utils.LogUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -144,6 +146,55 @@ public class BinanceExchangeClient implements ExchangeClient {
             list.add(exchangePosition);
         }
         return list.size() == 0 ? null : list;
+    }
+
+    @Override
+    public void openLongPosition(Signal signal) {
+        changeMarginType(signal.getCoin());
+        BigDecimal currentPrice = getCurrentPrice(signal.getCoin());
+        if (signal.getEntryPrice().compareTo(currentPrice) > 0) {
+            signal.setEntryPrice(currentPrice.subtract(getDiffPrice(signal.getCoin())));
+        }
+
+        NewOrderRequest request = new NewOrderRequest();
+        request.setSymbol(convertCommonPair(signal.getCoin()));
+        request.setSide(Side.BUY);
+        request.setType("LIMIT");
+        request.setTimeInForce(TimeInForce.GTC);
+        request.setQuantity(signal.getQuantity().doubleValue());
+        request.setPrice(signal.getEntryPrice().doubleValue());
+        ApiResponse<NewOrderResponse> newOrder = binanceFuturesRestApi.newOrder(request);
+        Long orderId = newOrder.getData().getOrderId();
+    }
+
+    private BigDecimal getDiffPrice(String symbol) {
+        if (symbol.equals("BTC")) {
+            return new BigDecimal("30");
+        }
+        if (symbol.equals("ETH")) {
+            return new BigDecimal("10");
+        }
+        if (symbol.equals("BNB")) {
+            return new BigDecimal("5");
+        }
+        return new BigDecimal("1");
+    }
+
+    private void changeMarginType(String symbol) {
+        ChangeMarginTypeRequest marginTypeRequest = new ChangeMarginTypeRequest();
+        marginTypeRequest.setMarginType(MarginType.ISOLATED);
+        marginTypeRequest.setSymbol(convertCommonPair(symbol));
+        ApiResponse<ChangeMarginTypeResponse> response = binanceFuturesRestApi.changeMarginType(marginTypeRequest);
+        if (response != null && response.getData().getCode() == 200) {
+            LogUtil.serviceLog("修改保证金成功, symbol=" + symbol);
+        } else {
+            LogUtil.serviceLog("修改保证金失败, symbol=" + symbol);
+        }
+    }
+
+    @Override
+    public void openShortPosition(Signal signal) {
+
     }
 
     private Interval convertInterval(ExchangeIntervalEnum interval) {
