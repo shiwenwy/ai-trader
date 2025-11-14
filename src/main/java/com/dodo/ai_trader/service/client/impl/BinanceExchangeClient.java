@@ -8,18 +8,22 @@ import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.De
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.*;
 import com.dodo.ai_trader.service.client.ExchangeClient;
 import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
+import com.dodo.ai_trader.service.enums.PositionOrderStatus;
 import com.dodo.ai_trader.service.enums.SideEnum;
+import com.dodo.ai_trader.service.model.OpenPositionOrder;
 import com.dodo.ai_trader.service.model.Signal;
 import com.dodo.ai_trader.service.model.market.ExchangeBalance;
 import com.dodo.ai_trader.service.model.market.ExchangePosition;
 import com.dodo.ai_trader.service.model.market.FundingRate;
 import com.dodo.ai_trader.service.model.market.KLine;
+import com.dodo.ai_trader.service.repository.OpenPositionOrderRepository;
 import com.dodo.ai_trader.service.utils.LogUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Component("binance")
@@ -27,6 +31,9 @@ public class BinanceExchangeClient implements ExchangeClient {
 
     @Autowired
     private DerivativesTradingUsdsFuturesRestApi binanceFuturesRestApi;
+
+    @Autowired
+    private OpenPositionOrderRepository openPositionOrderRepository;
 
     @Override
     public BigDecimal getCurrentPrice(String symbol) {
@@ -149,7 +156,13 @@ public class BinanceExchangeClient implements ExchangeClient {
     }
 
     @Override
-    public void openLongPosition(String bizId, Signal signal) {
+    public void openLongPosition(String bizId, String userId, Signal signal) {
+
+        OpenPositionOrder old = openPositionOrderRepository.findByClientOrderId(bizId, "binance");
+        if (old != null) {
+            return;
+        }
+
         changeMarginType(signal.getCoin());
         BigDecimal currentPrice = getCurrentPrice(signal.getCoin());
         if (signal.getEntryPrice().compareTo(currentPrice) > 0) {
@@ -167,6 +180,28 @@ public class BinanceExchangeClient implements ExchangeClient {
         ApiResponse<NewOrderResponse> newOrder = binanceFuturesRestApi.newOrder(request);
         Long orderId = newOrder.getData().getOrderId();
         LogUtil.serviceLog("开多仓, bizId: {}, orderId: {}, signal: {}", bizId, orderId, signal);
+        savePositionOrder(bizId, orderId, userId, SideEnum.LONG, signal);
+    }
+
+    private void savePositionOrder(String bizId, Long orderId, String userId, SideEnum side, Signal signal) {
+        OpenPositionOrder openPositionOrder = new OpenPositionOrder();
+        openPositionOrder.setClientOrderId(bizId);
+        openPositionOrder.setOrderId(orderId.toString());
+        openPositionOrder.setUserId(userId);
+        openPositionOrder.setExchange("binance");
+        openPositionOrder.setSymbol(signal.getCoin());
+        openPositionOrder.setSide(side);
+        openPositionOrder.setType("LIMIT");
+        openPositionOrder.setTimeInForce("GTC");
+        openPositionOrder.setQuantity(signal.getQuantity());
+        openPositionOrder.setEntryPrice(signal.getEntryPrice());
+        openPositionOrder.setStopPrice(signal.getStopLoss());
+        openPositionOrder.setProfitTarget(signal.getProfitTarget());
+        openPositionOrder.setOrderTime(new Date());
+        openPositionOrder.setStatus(PositionOrderStatus.PENDING);
+        openPositionOrder.setVersion(1);
+        openPositionOrderRepository.save(openPositionOrder);
+
     }
 
     private BigDecimal getDiffPrice(String symbol) {
@@ -195,8 +230,29 @@ public class BinanceExchangeClient implements ExchangeClient {
     }
 
     @Override
-    public void openShortPosition(String bizId, Signal signal) {
+    public void openShortPosition(String bizId, String userId, Signal signal) {
+        OpenPositionOrder old = openPositionOrderRepository.findByClientOrderId(bizId, "binance");
+        if (old != null) {
+            return;
+        }
+        changeMarginType(signal.getCoin());
+        BigDecimal currentPrice = getCurrentPrice(signal.getCoin());
+        if (signal.getEntryPrice().compareTo(currentPrice) < 0) {
+            signal.setEntryPrice(currentPrice.add(getDiffPrice(signal.getCoin())));
+        }
 
+        NewOrderRequest request = new NewOrderRequest();
+        request.setSymbol(convertCommonPair(signal.getCoin()));
+        request.setSide(Side.SELL);
+        request.setType("LIMIT");
+        request.setTimeInForce(TimeInForce.GTC);
+        request.setQuantity(signal.getQuantity().doubleValue());
+        request.setPrice(signal.getEntryPrice().doubleValue());
+        request.setNewClientOrderId(bizId);
+        ApiResponse<NewOrderResponse> newOrder = binanceFuturesRestApi.newOrder(request);
+        Long orderId = newOrder.getData().getOrderId();
+        LogUtil.serviceLog("开多仓, bizId: {}, orderId: {}, signal: {}", bizId, orderId, signal);
+        savePositionOrder(bizId, orderId, userId, SideEnum.SHORT, signal);
     }
 
     private Interval convertInterval(ExchangeIntervalEnum interval) {

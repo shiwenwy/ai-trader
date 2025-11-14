@@ -35,4 +35,19 @@
         values (now(), now(), #{clientOrderId}, #{orderId}, #{userId}, #{exchange}, #{symbol}, #{side}, #{type}, #{timeInForce},
         #{quantity}, #{entryPrice}, #{stopPrice}, #{profitTarget}, #{orderTime}, #{status}, #{version})
     </insert>
+
+    <select id="selectProcessOrder" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from open_position_order
+        where status in ('PENDING', 'FILLED')
+    </select>
+
+    <select id="queryByClientOrderId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from open_position_order
+        where client_order_id = #{clientOrderId}
+        and exchange = #{exchange}
+    </select>
 </mapper>

@@ -110,7 +110,7 @@ public class TradeServiceImpl implements TradeService {
             return;
         }
         ExchangeClient exchangeClient = exchangeClientMap.get(exchange);
-        exchangeClient.openLongPosition(bizId, signal);
+        exchangeClient.openLongPosition(bizId, userId, signal);
     }
 
     private void handleOpenShortPosition(String userId, String exchange, Signal signal) {
@@ -125,6 +125,6 @@ public class TradeServiceImpl implements TradeService {
             return;
         }
         ExchangeClient exchangeClient = exchangeClientMap.get(exchange);
-        exchangeClient.openShortPosition(bizId, signal);
+        exchangeClient.openShortPosition(bizId, userId, signal);
     }
 }
