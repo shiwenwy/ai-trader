@@ -3,9 +3,12 @@ package com.dodo.ai_trader.biz.task;
 
 
 import com.dodo.ai_trader.biz.taskhandler.TaskHandler;
+import com.dodo.ai_trader.service.enums.PositionOrderStatus;
 import com.dodo.ai_trader.service.enums.TaskStatusEnum;
 import com.dodo.ai_trader.service.model.AsyncTask;
+import com.dodo.ai_trader.service.model.OpenPositionOrder;
 import com.dodo.ai_trader.service.repository.AsyncTaskRepository;
+import com.dodo.ai_trader.service.repository.OpenPositionOrderRepository;
 import com.dodo.ai_trader.service.utils.LogUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -46,7 +49,6 @@ public class AsyncTaskSchedule {
         System.out.println("End executing scheduled common task");
     }
 
-
     private void processAsyncTask(AsyncTask asyncTask) {
         try {
             if (!asyncTask.canExecute()) {
@@ -78,6 +80,24 @@ public class AsyncTaskSchedule {
                 asyncTaskRepository.updateExecuteCountAndNextExecuteTime(asyncTask.getBizId(),
                         asyncTask.getTaskType(), asyncTask.getShardId(), asyncTask.getExecuteCount(),
                         asyncTask.getNextExecuteTime(), asyncTask.getVersion());
+            }
+        }
+    }
+
+
+    @Autowired
+    private OpenPositionOrderRepository openPositionOrderRepository;
+
+    @Scheduled(cron = "0/2 * * * * ?")
+    public void executeProcessPositionOrderTask() {
+        List<OpenPositionOrder> positionOrderList = openPositionOrderRepository.queryProcessingOrderList();
+        if (positionOrderList == null || positionOrderList.isEmpty()) {
+            return;
+        }
+
+        for (OpenPositionOrder positionOrder : positionOrderList) {
+            if (positionOrder.getStatus() == PositionOrderStatus.PENDING) {
+
             }
         }
     }

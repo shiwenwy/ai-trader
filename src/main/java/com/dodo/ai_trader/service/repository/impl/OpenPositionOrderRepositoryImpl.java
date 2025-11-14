@@ -11,6 +11,8 @@ import com.dodo.ai_trader.service.utils.AssertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class OpenPositionOrderRepositoryImpl implements OpenPositionOrderRepository {
 
@@ -27,6 +29,15 @@ public class OpenPositionOrderRepositoryImpl implements OpenPositionOrderReposit
     public OpenPositionOrder findByClientOrderId(String clientOrderId, String exchange) {
 
         return convertToModel(openPositionOrderMapper.queryByClientOrderId(clientOrderId, exchange));
+    }
+
+    @Override
+    public List<OpenPositionOrder> queryProcessingOrderList() {
+        List<OpenPositionOrderEntity> entityList = openPositionOrderMapper.selectProcessOrder();
+        if (entityList != null && !entityList.isEmpty()) {
+            return entityList.stream().map(this::convertToModel).toList();
+        }
+        return null;
     }
 
     private OpenPositionOrder convertToModel(OpenPositionOrderEntity openPositionOrderEntity) {
