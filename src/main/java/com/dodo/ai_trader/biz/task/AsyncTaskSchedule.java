@@ -120,5 +120,14 @@ public class AsyncTaskSchedule {
     }
 
     private void handleFilledPositionOrder(OpenPositionOrder positionOrder) {
+        ExchangeClient exchangeClient = exchangeClientMap.get(positionOrder.getExchange());
+        // 设置止损价
+        exchangeClient.setStopLoss(positionOrder.getUserId(), positionOrder.getSymbol(),
+                positionOrder.getSide(), positionOrder.getStopPrice());
+        // 设置止盈价
+        exchangeClient.setTakeProfit(positionOrder.getUserId(), positionOrder.getSymbol(),
+                positionOrder.getSide(), positionOrder.getProfitTarget());
+        positionOrder.setStatus(PositionOrderStatus.COMPLETED);
+        openPositionOrderRepository.updateStatus(positionOrder);
     }
 }

@@ -2,6 +2,7 @@ package com.dodo.ai_trader.service.client;
 
 import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
 import com.dodo.ai_trader.service.enums.PositionOrderStatus;
+import com.dodo.ai_trader.service.enums.SideEnum;
 import com.dodo.ai_trader.service.model.OpenPositionOrder;
 import com.dodo.ai_trader.service.model.Signal;
 import com.dodo.ai_trader.service.model.market.ExchangeBalance;
@@ -82,4 +83,22 @@ public interface ExchangeClient {
      * @return
      */
     PositionOrderStatus getPositionOrderStatus(OpenPositionOrder openPositionOrder);
+
+    /**
+     * 设置止损价
+     * @param userId
+     * @param symbol
+     * @param side
+     * @param stopLoss
+     */
+    void setStopLoss(String userId, String symbol, SideEnum side, BigDecimal stopLoss);
+
+    /**
+     * 设置止盈价
+     * @param userId
+     * @param symbol
+     * @param side
+     * @param takeProfit
+     */
+    void setTakeProfit(String userId, String symbol, SideEnum side, BigDecimal takeProfit);
 }

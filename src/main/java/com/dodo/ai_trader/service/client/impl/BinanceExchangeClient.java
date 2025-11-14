@@ -213,7 +213,6 @@ public class BinanceExchangeClient implements ExchangeClient {
         openPositionOrder.setStatus(PositionOrderStatus.PENDING);
         openPositionOrder.setVersion(1);
         openPositionOrderRepository.save(openPositionOrder);
-
     }
 
     private BigDecimal getDiffPrice(String symbol) {
@@ -276,6 +275,36 @@ public class BinanceExchangeClient implements ExchangeClient {
         }
         LogUtil.serviceLog("查询订单状态, orderId: {}, response: {}", openPositionOrder.getOrderId(), response.getData().toJson());
         return convertStatus(response.getData().getStatus());
+    }
+
+    @Override
+    public void setStopLoss(String userId, String symbol, SideEnum side, BigDecimal stopLoss) {
+        NewOrderRequest request = new NewOrderRequest();
+        request.setSymbol(convertCommonPair(symbol));
+        request.setSide(side == SideEnum.LONG ? Side.BUY : Side.SELL);
+        request.setType("STOP_MARKET");
+        request.setTimeInForce(TimeInForce.GTC);
+        request.setClosePosition("true");
+        request.setStopPrice(stopLoss.doubleValue());
+        request.setWorkingType(WorkingType.MARK_PRICE);
+        ApiResponse<NewOrderResponse> newOrder = binanceFuturesRestApi.newOrder(request);
+        Long orderId = newOrder.getData().getOrderId();
+        LogUtil.serviceLog("设置止损, userId: {}, symbol: {}, side: {}, orderId: {}, stopLoss: {}", userId, symbol, side, orderId, stopLoss);
+    }
+
+    @Override
+    public void setTakeProfit(String userId, String symbol, SideEnum side, BigDecimal takeProfit) {
+        NewOrderRequest request = new NewOrderRequest();
+        request.setSymbol(convertCommonPair(symbol));
+        request.setSide(side == SideEnum.LONG ? Side.BUY : Side.SELL);
+        request.setType("TAKE_PROFIT_MARKET");
+        request.setTimeInForce(TimeInForce.GTC);
+        request.setClosePosition("true");
+        request.setStopPrice(takeProfit.doubleValue());
+        request.setWorkingType(WorkingType.MARK_PRICE);
+        ApiResponse<NewOrderResponse> newOrder = binanceFuturesRestApi.newOrder(request);
+        Long orderId = newOrder.getData().getOrderId();
+        LogUtil.serviceLog("设置止盈, userId: {}, symbol: {}, side: {}, orderId: {}, takeProfit: {}", userId, symbol, side, orderId, takeProfit);
     }
 
     // TODO 需要测试一下修改映射
