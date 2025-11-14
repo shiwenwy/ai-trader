@@ -30,6 +30,7 @@ public enum ErrorCodeEnum {
     USER_EXIST("1012", "用户已存在"),
     USER_NOT_LOGIN("1013", "用户未登录或登录已过期"),
     NOTIFY_FAILED("1014", "通知失败"),
+    CHANGE_LEVERAGE_ERROR("1015", "修改杠杆错误"),
     ;
 
     private String code;

@@ -58,6 +58,7 @@ public class OpenPositionOrderRepositoryImpl implements OpenPositionOrderReposit
         openPositionOrder.setUserId(openPositionOrderEntity.getUserId());
         openPositionOrder.setExchange(openPositionOrderEntity.getExchange());
         openPositionOrder.setSymbol(openPositionOrderEntity.getSymbol());
+        openPositionOrder.setLeverage(openPositionOrderEntity.getLeverage());
         openPositionOrder.setSide(SideEnum.getByCode(openPositionOrderEntity.getSide()));
         openPositionOrder.setType(openPositionOrderEntity.getType());
         openPositionOrder.setTimeInForce(openPositionOrderEntity.getTimeInForce());
@@ -82,6 +83,7 @@ public class OpenPositionOrderRepositoryImpl implements OpenPositionOrderReposit
         openPositionOrderEntity.setExchange(openPositionOrder.getExchange());
         openPositionOrderEntity.setSymbol(openPositionOrder.getSymbol());
         openPositionOrderEntity.setSide(openPositionOrder.getSide().name());
+        openPositionOrderEntity.setLeverage(openPositionOrder.getLeverage());
         openPositionOrderEntity.setType(openPositionOrder.getType());
         openPositionOrderEntity.setTimeInForce(openPositionOrder.getTimeInForce());
         openPositionOrderEntity.setQuantity(openPositionOrder.getQuantity());

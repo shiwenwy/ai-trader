@@ -21,19 +21,20 @@
         <result column="profit_target" property="profitTarget" jdbcType="DECIMAL"/>
         <result column="order_time" property="orderTime" jdbcType="TIMESTAMP"/>
         <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="leverage" property="leverage" jdbcType="INTEGER"/>
         <result column="version" property="version" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id, create_time, update_time, client_order_id, order_id, user_id, exchange, symbol, side, type, time_in_force,
-        quantity, entry_price, stop_price, profit_target, order_time, status, version
+        quantity, entry_price, stop_price, profit_target, order_time, status, leverage, version
     </sql>
 
     <insert id="insert" parameterType="com.dodo.ai_trader.service.mapper.entity.OpenPositionOrderEntity">
         insert into open_position_order (create_time, update_time, client_order_id, order_id, user_id, exchange, symbol, side, type, time_in_force,
-        quantity, entry_price, stop_price, profit_target, order_time, status, version)
+        quantity, entry_price, stop_price, profit_target, order_time, status, leverage, version)
         values (now(), now(), #{clientOrderId}, #{orderId}, #{userId}, #{exchange}, #{symbol}, #{side}, #{type}, #{timeInForce},
-        #{quantity}, #{entryPrice}, #{stopPrice}, #{profitTarget}, #{orderTime}, #{status}, #{version})
+        #{quantity}, #{entryPrice}, #{stopPrice}, #{profitTarget}, #{orderTime}, #{status}, #{leverage}, #{version})
     </insert>
 
     <select id="selectProcessOrder" resultMap="BaseResultMap">

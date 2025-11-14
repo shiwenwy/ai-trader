@@ -7,6 +7,7 @@ import com.binance.connector.client.common.ApiResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.DerivativesTradingUsdsFuturesRestApi;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.*;
 import com.dodo.ai_trader.service.client.ExchangeClient;
+import com.dodo.ai_trader.service.enums.ErrorCodeEnum;
 import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
 import com.dodo.ai_trader.service.enums.PositionOrderStatus;
 import com.dodo.ai_trader.service.enums.SideEnum;
@@ -17,6 +18,7 @@ import com.dodo.ai_trader.service.model.market.ExchangePosition;
 import com.dodo.ai_trader.service.model.market.FundingRate;
 import com.dodo.ai_trader.service.model.market.KLine;
 import com.dodo.ai_trader.service.repository.OpenPositionOrderRepository;
+import com.dodo.ai_trader.service.utils.AssertUtil;
 import com.dodo.ai_trader.service.utils.LogUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -164,6 +166,7 @@ public class BinanceExchangeClient implements ExchangeClient {
         }
 
         changeMarginType(signal.getCoin());
+        changeLeverage(signal.getCoin(), signal.getLeverage().longValue());
         BigDecimal currentPrice = getCurrentPrice(signal.getCoin());
         if (signal.getEntryPrice().compareTo(currentPrice) > 0) {
             signal.setEntryPrice(currentPrice.subtract(getDiffPrice(signal.getCoin())));
@@ -183,6 +186,14 @@ public class BinanceExchangeClient implements ExchangeClient {
         savePositionOrder(bizId, orderId, userId, SideEnum.LONG, signal);
     }
 
+    private void changeLeverage(String symbol, Long leverage) {
+        ChangeInitialLeverageRequest request = new ChangeInitialLeverageRequest();
+        request.setSymbol(convertCommonPair(symbol));
+        request.setLeverage(leverage);
+        ApiResponse<ChangeInitialLeverageResponse> initialLeverage = binanceFuturesRestApi.changeInitialLeverage(request);
+        AssertUtil.isTrue(initialLeverage.getData().getLeverage().longValue() == leverage, ErrorCodeEnum.CHANGE_LEVERAGE_ERROR, "设置杠杆失败", true);
+    }
+
     private void savePositionOrder(String bizId, Long orderId, String userId, SideEnum side, Signal signal) {
         OpenPositionOrder openPositionOrder = new OpenPositionOrder();
         openPositionOrder.setClientOrderId(bizId);
@@ -193,6 +204,7 @@ public class BinanceExchangeClient implements ExchangeClient {
         openPositionOrder.setSide(side);
         openPositionOrder.setType("LIMIT");
         openPositionOrder.setTimeInForce("GTC");
+        openPositionOrder.setLeverage(signal.getLeverage());
         openPositionOrder.setQuantity(signal.getQuantity());
         openPositionOrder.setEntryPrice(signal.getEntryPrice());
         openPositionOrder.setStopPrice(signal.getStopLoss());
@@ -236,6 +248,7 @@ public class BinanceExchangeClient implements ExchangeClient {
             return;
         }
         changeMarginType(signal.getCoin());
+        changeLeverage(signal.getCoin(), signal.getLeverage().longValue());
         BigDecimal currentPrice = getCurrentPrice(signal.getCoin());
         if (signal.getEntryPrice().compareTo(currentPrice) < 0) {
             signal.setEntryPrice(currentPrice.add(getDiffPrice(signal.getCoin())));

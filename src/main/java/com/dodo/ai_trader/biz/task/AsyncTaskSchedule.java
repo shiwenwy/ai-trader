@@ -102,6 +102,7 @@ public class AsyncTaskSchedule {
                 handlePendingPositionOrder(positionOrder);
             }
             if (positionOrder.getStatus() == PositionOrderStatus.FILLED) {
+                handleFilledPositionOrder(positionOrder);
             }
         }
     }
@@ -116,5 +117,8 @@ public class AsyncTaskSchedule {
             positionOrder.setStatus(PositionOrderStatus.FILLED);
             openPositionOrderRepository.updateStatus(positionOrder);
         }
+    }
+
+    private void handleFilledPositionOrder(OpenPositionOrder positionOrder) {
     }
 }

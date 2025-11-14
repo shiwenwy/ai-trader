@@ -42,6 +42,11 @@ public class OpenPositionOrderEntity implements Serializable {
 
     private String type;
 
+    /**
+     * 杠杆倍数
+     */
+    private Integer leverage;
+
     private String timeInForce;
 
     private BigDecimal quantity;
