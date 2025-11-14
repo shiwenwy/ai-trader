@@ -3,6 +3,7 @@ package com.dodo.ai_trader.biz.task;
 
 
 import com.dodo.ai_trader.biz.taskhandler.TaskHandler;
+import com.dodo.ai_trader.service.client.ExchangeClient;
 import com.dodo.ai_trader.service.enums.PositionOrderStatus;
 import com.dodo.ai_trader.service.enums.TaskStatusEnum;
 import com.dodo.ai_trader.service.model.AsyncTask;
@@ -84,9 +85,10 @@ public class AsyncTaskSchedule {
         }
     }
 
-
     @Autowired
     private OpenPositionOrderRepository openPositionOrderRepository;
+    @Autowired
+    private Map<String, ExchangeClient> exchangeClientMap;
 
     @Scheduled(cron = "0/2 * * * * ?")
     public void executeProcessPositionOrderTask() {
@@ -97,8 +99,22 @@ public class AsyncTaskSchedule {
 
         for (OpenPositionOrder positionOrder : positionOrderList) {
             if (positionOrder.getStatus() == PositionOrderStatus.PENDING) {
-
+                handlePendingPositionOrder(positionOrder);
             }
+            if (positionOrder.getStatus() == PositionOrderStatus.FILLED) {
+            }
+        }
+    }
+
+    private void handlePendingPositionOrder(OpenPositionOrder positionOrder) {
+        ExchangeClient exchangeClient = exchangeClientMap.get(positionOrder.getExchange());
+        PositionOrderStatus orderStatus = exchangeClient.getPositionOrderStatus(positionOrder);
+        if (orderStatus == null || orderStatus == PositionOrderStatus.PENDING) {
+            return;
+        }
+        if (orderStatus == PositionOrderStatus.FILLED) {
+            positionOrder.setStatus(PositionOrderStatus.FILLED);
+            openPositionOrderRepository.updateStatus(positionOrder);
         }
     }
 }

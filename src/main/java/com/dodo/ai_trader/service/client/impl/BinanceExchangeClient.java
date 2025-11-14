@@ -255,6 +255,36 @@ public class BinanceExchangeClient implements ExchangeClient {
         savePositionOrder(bizId, orderId, userId, SideEnum.SHORT, signal);
     }
 
+    @Override
+    public PositionOrderStatus getPositionOrderStatus(OpenPositionOrder openPositionOrder) {
+        ApiResponse<QueryOrderResponse> response = binanceFuturesRestApi.queryOrder(convertCommonPair(openPositionOrder.getSymbol()), Long.parseLong(openPositionOrder.getOrderId()), openPositionOrder.getClientOrderId(), null);
+        if (response == null || response.getData() == null) {
+            return null;
+        }
+        LogUtil.serviceLog("查询订单状态, orderId: {}, response: {}", openPositionOrder.getOrderId(), response.getData().toJson());
+        return convertStatus(response.getData().getStatus());
+    }
+
+    // TODO 需要测试一下修改映射
+    private PositionOrderStatus convertStatus(String status) {
+        if (status.equals("NEW")) {
+            return PositionOrderStatus.PENDING;
+        }
+        if (status.equals("FILLED")) {
+            return PositionOrderStatus.FILLED;
+        }
+        if (status.equals("CANCELED")) {
+            return PositionOrderStatus.CANCELED;
+        }
+        if (status.equals("EXPIRED")) {
+            return PositionOrderStatus.EXPIRED;
+        }
+        if (status.equals("COMPLETED")) {
+            return PositionOrderStatus.COMPLETED;
+        }
+        return null;
+    }
+
     private Interval convertInterval(ExchangeIntervalEnum interval) {
         return Interval.fromValue(interval.getValue());
     }

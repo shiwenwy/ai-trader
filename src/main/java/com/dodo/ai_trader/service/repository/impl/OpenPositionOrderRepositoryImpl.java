@@ -40,6 +40,14 @@ public class OpenPositionOrderRepositoryImpl implements OpenPositionOrderReposit
         return null;
     }
 
+    @Override
+    public void updateStatus(OpenPositionOrder positionOrder) {
+        int i = openPositionOrderMapper.updateStatus(positionOrder.getClientOrderId(), positionOrder.getExchange(),
+                positionOrder.getStatus().getCode(), positionOrder.getVersion());
+        AssertUtil.isTrue(i == 1, ErrorCodeEnum.DATABASE_ERROR, "更新开仓订单信息失败", true);
+        positionOrder.setVersion(positionOrder.getVersion() + 1);
+    }
+
     private OpenPositionOrder convertToModel(OpenPositionOrderEntity openPositionOrderEntity) {
         if (openPositionOrderEntity == null) {
             return null;

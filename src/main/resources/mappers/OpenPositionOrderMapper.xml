@@ -50,4 +50,14 @@
         where client_order_id = #{clientOrderId}
         and exchange = #{exchange}
     </select>
+
+    <update id="updateStatus">
+        update open_position_order
+        set status = #{status},
+        update_time = now(),
+        version = version + 1
+        where client_order_id = #{clientOrderId}
+        and exchange = #{exchange}
+        and version = #{version}
+    </update>
 </mapper>

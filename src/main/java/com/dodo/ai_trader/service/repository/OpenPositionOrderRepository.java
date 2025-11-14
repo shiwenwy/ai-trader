@@ -15,4 +15,6 @@ public interface OpenPositionOrderRepository {
     OpenPositionOrder findByClientOrderId(String clientOrderId, String exchange);
 
     List<OpenPositionOrder> queryProcessingOrderList();
+
+    void updateStatus(OpenPositionOrder positionOrder);
 }

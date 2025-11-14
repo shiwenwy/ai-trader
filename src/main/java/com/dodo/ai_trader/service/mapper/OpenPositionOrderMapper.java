@@ -12,4 +12,7 @@ public interface OpenPositionOrderMapper {
     List<OpenPositionOrderEntity> selectProcessOrder();
 
     OpenPositionOrderEntity queryByClientOrderId(@Param("clientOrderId") String clientOrderId, @Param("exchange") String exchange);
+
+    int updateStatus(@Param("clientOrderId") String clientOrderId, @Param("exchange") String exchange,
+                     @Param("status") String status, @Param("version") Integer version);
 }

@@ -1,6 +1,8 @@
 package com.dodo.ai_trader.service.client;
 
 import com.dodo.ai_trader.service.enums.ExchangeIntervalEnum;
+import com.dodo.ai_trader.service.enums.PositionOrderStatus;
+import com.dodo.ai_trader.service.model.OpenPositionOrder;
 import com.dodo.ai_trader.service.model.Signal;
 import com.dodo.ai_trader.service.model.market.ExchangeBalance;
 import com.dodo.ai_trader.service.model.market.ExchangePosition;
@@ -73,4 +75,11 @@ public interface ExchangeClient {
      * @param signal
      */
     void openShortPosition(String bizId, String userId, Signal signal);
+
+    /**
+     * 获取仓位订单状态
+     * @param openPositionOrder
+     * @return
+     */
+    PositionOrderStatus getPositionOrderStatus(OpenPositionOrder openPositionOrder);
 }
