@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -77,10 +78,21 @@ public class TradeServiceImpl implements TradeService {
     }
 
     private String handleOpenPosition(String userId, String exchange, Signal signal) {
+        List<AsyncTask> asyncTasks = asyncTaskRepository.queryUserProcessingTask(userId, TaskTypeEnum.OPEN_POSITION, TaskUtil.getShardId(userId));
+        if (!CollectionUtils.isEmpty(asyncTasks)) {
+            for (AsyncTask asyncTask : asyncTasks) {
+                String coin = (String) asyncTask.getExtInfo("coin");
+                if (coin.equals(signal.getCoin())) {
+                    return null;
+                }
+            }
+        }
+
         AsyncTask asyncTask = TaskUtil.buildAsyncTask(TaskTypeEnum.OPEN_POSITION,
                 IdGenerator.generateOpenPositionTaskId(signal.getCoin()), userId);
         asyncTask.addExtInfo("signal", signal);
         asyncTask.addExtInfo("exchange", exchange);
+        asyncTask.addExtInfo("coin", signal.getCoin());
         asyncTask.setNextExecuteTime(DateUtil.offset(new Date(), DateField.SECOND,40));
         asyncTaskRepository.saveAsyncTask(asyncTask);
         return asyncTask.getBizId();
@@ -94,6 +106,9 @@ public class TradeServiceImpl implements TradeService {
             return;
         }
         String bizId = handleOpenPosition(userId, exchange, signal);
+        if (bizId == null) {
+            return;
+        }
         ExchangeClient exchangeClient = exchangeClientMap.get(exchange);
         exchangeClient.openLongPosition(bizId, signal);
     }
@@ -106,6 +121,9 @@ public class TradeServiceImpl implements TradeService {
             return;
         }
         String bizId = handleOpenPosition(userId, exchange, signal);
+        if (bizId == null) {
+            return;
+        }
         ExchangeClient exchangeClient = exchangeClientMap.get(exchange);
         exchangeClient.openShortPosition(bizId, signal);
     }

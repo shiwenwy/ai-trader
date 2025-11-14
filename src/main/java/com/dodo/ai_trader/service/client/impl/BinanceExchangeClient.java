@@ -163,8 +163,10 @@ public class BinanceExchangeClient implements ExchangeClient {
         request.setTimeInForce(TimeInForce.GTC);
         request.setQuantity(signal.getQuantity().doubleValue());
         request.setPrice(signal.getEntryPrice().doubleValue());
+        request.setNewClientOrderId(bizId);
         ApiResponse<NewOrderResponse> newOrder = binanceFuturesRestApi.newOrder(request);
         Long orderId = newOrder.getData().getOrderId();
+        LogUtil.serviceLog("开多仓, bizId: {}, orderId: {}, signal: {}", bizId, orderId, signal);
     }
 
     private BigDecimal getDiffPrice(String symbol) {
