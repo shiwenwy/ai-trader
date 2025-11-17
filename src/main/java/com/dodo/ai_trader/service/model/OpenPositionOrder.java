@@ -48,5 +48,9 @@ public class OpenPositionOrder implements Serializable {
 
     private PositionOrderStatus status;
 
+    private String stopLossClientOrderId;
+
+    private String profitClientOrderId;
+
     private Integer version;
 }

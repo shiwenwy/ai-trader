@@ -61,5 +61,9 @@ public class OpenPositionOrderEntity implements Serializable {
 
     private String status;
 
+    private String stopLossClientOrderId;
+
+    private String profitClientOrderId;
+
     private Integer version;
 }

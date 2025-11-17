@@ -15,4 +15,10 @@ public interface OpenPositionOrderMapper {
 
     int updateStatus(@Param("clientOrderId") String clientOrderId, @Param("exchange") String exchange,
                      @Param("status") String status, @Param("version") Integer version);
+
+    int updateStopLossClientOrderId(@Param("clientOrderId") String clientOrderId, @Param("exchange") String exchange,
+                                    @Param("stopLossClientOrderId") String stopLossClientOrderId, @Param("version") Integer version);
+
+    int updateProfitClientOrderId(@Param("clientOrderId") String clientOrderId, @Param("exchange") String exchange,
+                                  @Param("profitClientOrderId") String profitClientOrderId, @Param("version") Integer version);
 }

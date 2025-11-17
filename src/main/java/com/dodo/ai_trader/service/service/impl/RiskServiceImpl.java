@@ -1,14 +1,17 @@
 package com.dodo.ai_trader.service.service.impl;
 
 import com.dodo.ai_trader.service.client.ExchangeClient;
+import com.dodo.ai_trader.service.constant.SystemConstant;
 import com.dodo.ai_trader.service.enums.SideEnum;
 import com.dodo.ai_trader.service.enums.SignalEnum;
 import com.dodo.ai_trader.service.enums.TaskTypeEnum;
 import com.dodo.ai_trader.service.model.AsyncTask;
+import com.dodo.ai_trader.service.model.DecisionResult;
 import com.dodo.ai_trader.service.model.Signal;
 import com.dodo.ai_trader.service.model.market.ExchangeBalance;
 import com.dodo.ai_trader.service.model.market.ExchangePosition;
 import com.dodo.ai_trader.service.repository.AsyncTaskRepository;
+import com.dodo.ai_trader.service.repository.DecisionResultRepository;
 import com.dodo.ai_trader.service.service.RiskService;
 import com.dodo.ai_trader.service.utils.IdGenerator;
 import com.dodo.ai_trader.service.utils.LogUtil;
@@ -29,6 +32,9 @@ public class RiskServiceImpl implements RiskService {
 
     @Autowired
     private AsyncTaskRepository asyncTaskRepository;
+
+    @Autowired
+    private DecisionResultRepository decisionResultRepository;
 
     @Override
     public boolean riskCheckBeforeTrade(String userId, String exchange, Signal signal) {
@@ -58,8 +64,7 @@ public class RiskServiceImpl implements RiskService {
         if (!CollectionUtils.isEmpty(position)) {
 
             for (ExchangePosition exchangePosition : position) {
-                if ((exchangePosition.getSide() == SideEnum.LONG && signal.getSignal() == SignalEnum.BUY_TO_ENTER)
-                        || (exchangePosition.getSide() == SideEnum.SHORT && signal.getSignal() == SignalEnum.SELL_TO_ENTER)) {
+                if (exchangePosition.getSide() == convertSide(signal.getSignal())) {
                     LogUtil.serviceLog("账户已存在{}币种持仓", signal.getCoin());
                     return false;
                 } else {
@@ -76,6 +81,43 @@ public class RiskServiceImpl implements RiskService {
         }
 
         return true;
+    }
+
+    @Override
+    public void riskCheckAfterTrade(String userId, String exchange, ExchangePosition position) {
+        List<DecisionResult> resultList = decisionResultRepository.getLastDecisionResultList(
+                SystemConstant.DEFAULT_USER_ID, "binance", 1);
+        if (!CollectionUtils.isEmpty(resultList)) {
+            DecisionResult decisionResult = resultList.get(0);
+            if (handleLastDecisionResult(decisionResult, position)) {
+                LogUtil.serviceLog("上次信号已处理,请勿重复处理");
+                return;
+            }
+        }
+    }
+
+    private boolean handleLastDecisionResult(DecisionResult decisionResult, ExchangePosition position) {
+        if (decisionResult == null || CollectionUtils.isEmpty(decisionResult.getSignalList())
+                || !decisionResult.betweenMinute(1)) {
+            return false;
+        }
+        for (Signal signal : decisionResult.getSignalList()) {
+            if (signal.getCoin().equals(position.getSymbol()) && convertSide(signal.getSignal()) == position.getSide()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private SideEnum convertSide(SignalEnum signalEnum) {
+        if (signalEnum == SignalEnum.BUY_TO_ENTER) {
+            return SideEnum.LONG;
+        }
+        if (signalEnum == SignalEnum.SELL_TO_ENTER) {
+            return SideEnum.SHORT;
+        }
+        return null;
     }
 
     private void handleClosePosition(String userId, String coin) {

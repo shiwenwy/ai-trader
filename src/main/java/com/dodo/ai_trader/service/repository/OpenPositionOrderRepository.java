@@ -17,4 +17,8 @@ public interface OpenPositionOrderRepository {
     List<OpenPositionOrder> queryProcessingOrderList();
 
     void updateStatus(OpenPositionOrder positionOrder);
+
+    void updateStopLossClientOrderId(OpenPositionOrder positionOrder);
+
+    void updateProfitClientOrderId(OpenPositionOrder positionOrder);
 }

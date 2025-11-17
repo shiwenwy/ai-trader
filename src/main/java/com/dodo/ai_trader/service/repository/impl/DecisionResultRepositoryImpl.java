@@ -43,6 +43,7 @@ public class DecisionResultRepositoryImpl implements DecisionResultRepository {
         decisionResult.setExchange(entity.getExchange());
         decisionResult.setThinking(entity.getThinking());
         decisionResult.setSignalList(JSON.parseArray(entity.getSignalList(), Signal.class));
+        decisionResult.setTimestamp(entity.getTimestamp());
         return decisionResult;
     }
 

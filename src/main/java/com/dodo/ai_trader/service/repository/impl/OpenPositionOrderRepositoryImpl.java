@@ -48,6 +48,22 @@ public class OpenPositionOrderRepositoryImpl implements OpenPositionOrderReposit
         positionOrder.setVersion(positionOrder.getVersion() + 1);
     }
 
+    @Override
+    public void updateStopLossClientOrderId(OpenPositionOrder positionOrder) {
+        int i = openPositionOrderMapper.updateStopLossClientOrderId(positionOrder.getClientOrderId(), positionOrder.getExchange(),
+                positionOrder.getStopLossClientOrderId(), positionOrder.getVersion());
+        AssertUtil.isTrue(i == 1, ErrorCodeEnum.DATABASE_ERROR, "更新止损订单id失败", true);
+        positionOrder.setVersion(positionOrder.getVersion() + 1);
+    }
+
+    @Override
+    public void updateProfitClientOrderId(OpenPositionOrder positionOrder) {
+        int i = openPositionOrderMapper.updateProfitClientOrderId(positionOrder.getClientOrderId(), positionOrder.getExchange(),
+                positionOrder.getProfitClientOrderId(), positionOrder.getVersion());
+        AssertUtil.isTrue(i == 1, ErrorCodeEnum.DATABASE_ERROR, "更新止盈订单id失败", true);
+        positionOrder.setVersion(positionOrder.getVersion() + 1);
+    }
+
     private OpenPositionOrder convertToModel(OpenPositionOrderEntity openPositionOrderEntity) {
         if (openPositionOrderEntity == null) {
             return null;

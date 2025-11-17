@@ -22,19 +22,22 @@
         <result column="order_time" property="orderTime" jdbcType="TIMESTAMP"/>
         <result column="status" property="status" jdbcType="VARCHAR"/>
         <result column="leverage" property="leverage" jdbcType="INTEGER"/>
+        <result column="stop_loss_client_order_id" property="stopLossClientOrderId" jdbcType="VARCHAR"/>
+        <result column="profit_client_order_id" property="profitClientOrderId" jdbcType="VARCHAR"/>
         <result column="version" property="version" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id, create_time, update_time, client_order_id, order_id, user_id, exchange, symbol, side, type, time_in_force,
-        quantity, entry_price, stop_price, profit_target, order_time, status, leverage, version
+        quantity, entry_price, stop_price, profit_target, order_time, status, leverage, stop_loss_client_order_id, profit_client_order_id, version
     </sql>
 
     <insert id="insert" parameterType="com.dodo.ai_trader.service.mapper.entity.OpenPositionOrderEntity">
         insert into open_position_order (create_time, update_time, client_order_id, order_id, user_id, exchange, symbol, side, type, time_in_force,
-        quantity, entry_price, stop_price, profit_target, order_time, status, leverage, version)
+        quantity, entry_price, stop_price, profit_target, order_time, status, leverage, stop_loss_client_order_id, profit_client_order_id, version)
         values (now(), now(), #{clientOrderId}, #{orderId}, #{userId}, #{exchange}, #{symbol}, #{side}, #{type}, #{timeInForce},
-        #{quantity}, #{entryPrice}, #{stopPrice}, #{profitTarget}, #{orderTime}, #{status}, #{leverage}, #{version})
+        #{quantity}, #{entryPrice}, #{stopPrice}, #{profitTarget}, #{orderTime}, #{status}, #{leverage}, #{stopLossClientOrderId},
+        #{profitClientOrderId}, #{version})
     </insert>
 
     <select id="selectProcessOrder" resultMap="BaseResultMap">
@@ -55,6 +58,26 @@
     <update id="updateStatus">
         update open_position_order
         set status = #{status},
+        update_time = now(),
+        version = version + 1
+        where client_order_id = #{clientOrderId}
+        and exchange = #{exchange}
+        and version = #{version}
+    </update>
+
+    <update id="updateStopLossClientOrderId">
+        update open_position_order
+        set stop_loss_client_order_id = #{stopLossClientOrderId},
+        update_time = now(),
+        version = version + 1
+        where client_order_id = #{clientOrderId}
+        and exchange = #{exchange}
+        and version = #{version}
+    </update>
+
+    <update id="updateProfitClientOrderId">
+        update open_position_order
+        set profit_client_order_id = #{profitClientOrderId},
         update_time = now(),
         version = version + 1
         where client_order_id = #{clientOrderId}
