@@ -68,4 +68,5 @@ public class TradeTest {
         ApiResponse<CancelOrderResponse> response = binanceFuturesRestApi.cancelOrder("BTCUSDT", null, "clientId", null);
         System.out.println(response.getData().toJson());
     }
+
 }

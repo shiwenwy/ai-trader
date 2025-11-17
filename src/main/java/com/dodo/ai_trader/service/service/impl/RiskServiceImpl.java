@@ -66,6 +66,7 @@ public class RiskServiceImpl implements RiskService {
             for (ExchangePosition exchangePosition : position) {
                 if (exchangePosition.getSide() == convertSide(signal.getSignal())) {
                     LogUtil.serviceLog("账户已存在{}币种持仓", signal.getCoin());
+                    handleSetStopProfit(userId, signal.getCoin(), signal);
                     return false;
                 } else {
                     LogUtil.serviceLog("账户已存在{}币种持仓,请平仓", signal.getCoin());
@@ -79,7 +80,6 @@ public class RiskServiceImpl implements RiskService {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -123,6 +123,15 @@ public class RiskServiceImpl implements RiskService {
     private void handleClosePosition(String userId, String coin) {
         AsyncTask asyncTask = TaskUtil.buildAsyncTask(TaskTypeEnum.CLOSE_POSITION,
                 IdGenerator.generateClosePositionTaskId(coin), userId);
+        asyncTaskRepository.saveAsyncTask(asyncTask);
+    }
+
+    private void handleSetStopProfit(String userId, String coin, Signal signal) {
+        AsyncTask asyncTask = TaskUtil.buildAsyncTask(TaskTypeEnum.SET_STOP_PROFIT_LOSS,
+                IdGenerator.generateSignalTaskId(coin), userId);
+        asyncTask.addExtInfo("stopProfit", signal.getProfitTarget());
+        asyncTask.addExtInfo("stopLoss", signal.getStopLoss());
+        asyncTask.addExtInfo("coin", coin);
         asyncTaskRepository.saveAsyncTask(asyncTask);
     }
 }
