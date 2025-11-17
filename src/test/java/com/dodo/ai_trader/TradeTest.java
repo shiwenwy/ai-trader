@@ -1,11 +1,9 @@
 package com.dodo.ai_trader;
 
+import com.binance.connector.client.common.ApiException;
 import com.binance.connector.client.common.ApiResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.DerivativesTradingUsdsFuturesRestApi;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.FuturesAccountBalanceV3Response;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.NewOrderRequest;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.NewOrderResponse;
-import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.Side;
+import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.*;
 import com.dodo.ai_trader.service.constant.SystemConstant;
 import com.dodo.ai_trader.service.model.DecisionResult;
 import com.dodo.ai_trader.service.repository.DecisionResultRepository;
@@ -49,5 +47,20 @@ public class TradeTest {
                 .quantity(0.01);
         ApiResponse<NewOrderResponse> newOrder = binanceFuturesRestApi.newOrder(request);
         System.out.println(newOrder.getData().toJson());
+    }
+
+    @Test
+    public void test3() {
+        try {
+            ApiResponse<QueryOrderResponse> response = binanceFuturesRestApi.queryOrder("BTCUSDT", null, "clientId", null);
+            System.out.println(response.getData().toJson());
+        } catch (ApiException apiException) {
+            System.out.println(apiException.getCode());
+            System.out.println(apiException.getResponseBody());
+            if (apiException.getResponseBody().contains("Order does not exist")) {
+                System.out.println("Order does not exist");
+            }
+        }
+
     }
 }

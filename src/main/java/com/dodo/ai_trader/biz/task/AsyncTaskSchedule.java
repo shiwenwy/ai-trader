@@ -11,6 +11,7 @@ import com.dodo.ai_trader.service.model.OpenPositionOrder;
 import com.dodo.ai_trader.service.repository.AsyncTaskRepository;
 import com.dodo.ai_trader.service.repository.OpenPositionOrderRepository;
 import com.dodo.ai_trader.service.utils.LogUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -121,12 +122,22 @@ public class AsyncTaskSchedule {
 
     private void handleFilledPositionOrder(OpenPositionOrder positionOrder) {
         ExchangeClient exchangeClient = exchangeClientMap.get(positionOrder.getExchange());
+
+        if (StringUtils.isBlank(positionOrder.getStopLossClientOrderId())) {
+            positionOrder.setStopLossClientOrderId(positionOrder.getClientOrderId() + "_stop_loss");
+            openPositionOrderRepository.updateStopLossClientOrderId(positionOrder);
+        }
         // 设置止损价
-        exchangeClient.setStopLoss(positionOrder.getUserId(), positionOrder.getSymbol(),
-                positionOrder.getSide(), positionOrder.getStopPrice());
+        exchangeClient.setStopLoss(positionOrder.getStopLossClientOrderId(), positionOrder.getUserId(),
+                positionOrder.getSymbol(), positionOrder.getSide(), positionOrder.getStopPrice());
+
+        if (StringUtils.isBlank(positionOrder.getProfitClientOrderId())) {
+            positionOrder.setProfitClientOrderId(positionOrder.getClientOrderId() + "_profit");
+            openPositionOrderRepository.updateProfitClientOrderId(positionOrder);
+        }
         // 设置止盈价
-        exchangeClient.setTakeProfit(positionOrder.getUserId(), positionOrder.getSymbol(),
-                positionOrder.getSide(), positionOrder.getProfitTarget());
+        exchangeClient.setTakeProfit(positionOrder.getProfitClientOrderId(), positionOrder.getUserId(),
+                positionOrder.getSymbol(), positionOrder.getSide(), positionOrder.getProfitTarget());
         positionOrder.setStatus(PositionOrderStatus.COMPLETED);
         openPositionOrderRepository.updateStatus(positionOrder);
     }

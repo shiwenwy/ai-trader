@@ -84,6 +84,8 @@ public class OpenPositionOrderRepositoryImpl implements OpenPositionOrderReposit
         openPositionOrder.setProfitTarget(openPositionOrderEntity.getProfitTarget());
         openPositionOrder.setOrderTime(openPositionOrderEntity.getOrderTime());
         openPositionOrder.setStatus(PositionOrderStatus.getByCode(openPositionOrderEntity.getStatus()));
+        openPositionOrder.setStopLossClientOrderId(openPositionOrderEntity.getStopLossClientOrderId());
+        openPositionOrder.setProfitClientOrderId(openPositionOrderEntity.getProfitClientOrderId());
         openPositionOrder.setVersion(openPositionOrderEntity.getVersion());
         return openPositionOrder;
     }
@@ -108,6 +110,8 @@ public class OpenPositionOrderRepositoryImpl implements OpenPositionOrderReposit
         openPositionOrderEntity.setProfitTarget(openPositionOrder.getProfitTarget());
         openPositionOrderEntity.setOrderTime(openPositionOrder.getOrderTime());
         openPositionOrderEntity.setStatus(openPositionOrder.getStatus() == null ? null : openPositionOrder.getStatus().getCode());
+        openPositionOrderEntity.setStopLossClientOrderId(openPositionOrder.getStopLossClientOrderId());
+        openPositionOrderEntity.setProfitClientOrderId(openPositionOrder.getProfitClientOrderId());
         openPositionOrderEntity.setVersion(openPositionOrder.getVersion());
         return openPositionOrderEntity;
     }

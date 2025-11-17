@@ -3,6 +3,7 @@ package com.dodo.ai_trader.service.client.impl;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.binance.connector.client.common.ApiException;
 import com.binance.connector.client.common.ApiResponse;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.api.DerivativesTradingUsdsFuturesRestApi;
 import com.binance.connector.client.derivatives_trading_usds_futures.rest.model.*;
@@ -269,7 +270,8 @@ public class BinanceExchangeClient implements ExchangeClient {
 
     @Override
     public PositionOrderStatus getPositionOrderStatus(OpenPositionOrder openPositionOrder) {
-        ApiResponse<QueryOrderResponse> response = binanceFuturesRestApi.queryOrder(convertCommonPair(openPositionOrder.getSymbol()), Long.parseLong(openPositionOrder.getOrderId()), openPositionOrder.getClientOrderId(), null);
+        ApiResponse<QueryOrderResponse> response = queryOrder(openPositionOrder.getSymbol(),
+                Long.parseLong(openPositionOrder.getOrderId()), openPositionOrder.getClientOrderId());
         if (response == null || response.getData() == null) {
             return null;
         }
@@ -278,7 +280,13 @@ public class BinanceExchangeClient implements ExchangeClient {
     }
 
     @Override
-    public void setStopLoss(String userId, String symbol, SideEnum side, BigDecimal stopLoss) {
+    public void setStopLoss(String clientId, String userId, String symbol, SideEnum side, BigDecimal stopLoss) {
+
+        ApiResponse<QueryOrderResponse> response = queryOrder(symbol, null, clientId);
+        if (response != null || response.getData() != null) {
+            return;
+        }
+
         NewOrderRequest request = new NewOrderRequest();
         request.setSymbol(convertCommonPair(symbol));
         request.setSide(side == SideEnum.LONG ? Side.BUY : Side.SELL);
@@ -292,8 +300,24 @@ public class BinanceExchangeClient implements ExchangeClient {
         LogUtil.serviceLog("设置止损, userId: {}, symbol: {}, side: {}, orderId: {}, stopLoss: {}", userId, symbol, side, orderId, stopLoss);
     }
 
+    private ApiResponse<QueryOrderResponse> queryOrder(String symbol, Long orderId, String clientId) {
+        try {
+            ApiResponse<QueryOrderResponse> response = binanceFuturesRestApi.queryOrder(convertCommonPair(symbol), orderId, clientId, null);
+            return response;
+        } catch (ApiException apiException) {
+            if (apiException.getResponseBody().contains("Order does not exist")) {
+                return null;
+            }
+        }
+        throw new RuntimeException("查询币安订单异常");
+    }
+
     @Override
-    public void setTakeProfit(String userId, String symbol, SideEnum side, BigDecimal takeProfit) {
+    public void setTakeProfit(String clientId, String userId, String symbol, SideEnum side, BigDecimal takeProfit) {
+        ApiResponse<QueryOrderResponse> response = queryOrder(symbol, null, clientId);
+        if (response != null || response.getData() != null) {
+            return;
+        }
         NewOrderRequest request = new NewOrderRequest();
         request.setSymbol(convertCommonPair(symbol));
         request.setSide(side == SideEnum.LONG ? Side.BUY : Side.SELL);

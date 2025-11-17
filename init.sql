@@ -98,3 +98,29 @@ CREATE TABLE ai_trader.`decision_result` (
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='信号决策结果表';
+
+
+CREATE TABLE ai_trader.open_position_order (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '账户ID',
+    `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    client_order_id VARCHAR(255) NOT NULL,
+    order_id VARCHAR(32),
+    user_id VARCHAR(32) NOT NULL,
+    exchange VARCHAR(32) NOT NULL,
+    symbol VARCHAR(32) NOT NULL,
+    side VARCHAR(8) NOT NULL,
+    type VARCHAR(16) NOT NULL,
+    time_in_force VARCHAR(16),
+    quantity DECIMAL(64, 18) NOT NULL,
+    entry_price DECIMAL(64, 18),
+    stop_price DECIMAL(64, 18),
+    profit_target DECIMAL(64, 18),
+    order_time TIMESTAMP,
+    status VARCHAR(16) NOT NULL,
+    leverage INTEGER,
+    stop_loss_client_order_id VARCHAR(64),
+    profit_client_order_id VARCHAR(64),
+    version INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

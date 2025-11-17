@@ -86,19 +86,21 @@ public interface ExchangeClient {
 
     /**
      * 设置止损价
+     * @param clientId
      * @param userId
      * @param symbol
      * @param side
      * @param stopLoss
      */
-    void setStopLoss(String userId, String symbol, SideEnum side, BigDecimal stopLoss);
+    void setStopLoss(String clientId, String userId, String symbol, SideEnum side, BigDecimal stopLoss);
 
     /**
      * 设置止盈价
+     * @param clientId
      * @param userId
      * @param symbol
      * @param side
      * @param takeProfit
      */
-    void setTakeProfit(String userId, String symbol, SideEnum side, BigDecimal takeProfit);
+    void setTakeProfit(String clientId, String userId, String symbol, SideEnum side, BigDecimal takeProfit);
 }
