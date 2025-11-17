@@ -103,4 +103,12 @@ public interface ExchangeClient {
      * @param takeProfit
      */
     void setTakeProfit(String clientId, String userId, String symbol, SideEnum side, BigDecimal takeProfit);
+
+    /**
+     * 撤单. orderId与clientId二选一
+     * @param symbol
+     * @param orderId
+     * @param clientId
+     */
+    void cancelOrder(String symbol, String orderId, String clientId);
 }

@@ -331,6 +331,16 @@ public class BinanceExchangeClient implements ExchangeClient {
         LogUtil.serviceLog("设置止盈, userId: {}, symbol: {}, side: {}, orderId: {}, takeProfit: {}", userId, symbol, side, orderId, takeProfit);
     }
 
+    @Override
+    public void cancelOrder(String symbol, String orderId, String clientId) {
+        try {
+            ApiResponse<CancelOrderResponse> response = binanceFuturesRestApi.cancelOrder(convertCommonPair(symbol), orderId == null ? null : Long.parseLong(orderId), clientId, null);
+            AssertUtil.isTrue(response.getData().getStatus().equals("CANCELED"), ErrorCodeEnum.DATABASE_ERROR, "取消订单失败, orderId: " + orderId, true);
+        } catch (ApiException e) {
+            LogUtil.error("取消订单异常, symbol: {}, orderId: {}, clientId: {}, e: {}", symbol, orderId, clientId, e);
+        }
+    }
+
     // TODO 需要测试一下修改映射
     private PositionOrderStatus convertStatus(String status) {
         if (status.equals("NEW")) {
@@ -345,8 +355,8 @@ public class BinanceExchangeClient implements ExchangeClient {
         if (status.equals("EXPIRED")) {
             return PositionOrderStatus.EXPIRED;
         }
-        if (status.equals("COMPLETED")) {
-            return PositionOrderStatus.COMPLETED;
+        if (status.equals("REJECTED")) {
+            return PositionOrderStatus.CANCELED;
         }
         return null;
     }

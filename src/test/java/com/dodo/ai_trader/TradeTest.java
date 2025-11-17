@@ -61,6 +61,11 @@ public class TradeTest {
                 System.out.println("Order does not exist");
             }
         }
+    }
 
+    @Test
+    public void test4() {
+        ApiResponse<CancelOrderResponse> response = binanceFuturesRestApi.cancelOrder("BTCUSDT", null, "clientId", null);
+        System.out.println(response.getData().toJson());
     }
 }
